@@ -53,13 +53,9 @@ const Product = ({
           <img style={imgStyles} alt="error" src={itemAvailableImages[0]} />
         </Grid>
         <Grid container item sx={grid12}>
-          <Grid xs={9} display="flex" alignItems="center" item>
+          <Grid xs={8.5} display="flex" alignItems="center" item>
             <Typography
               level="title-md"
-              // noWrap={
-              //   "FUTURE 7 MATCH CREATIVITY FG/AG Men's Football Boots".length >
-              //   30
-              // }
             >
               {itemName}
             </Typography>

@@ -2,10 +2,12 @@ import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
 import { Grid, TextField, Dialog, Divider } from "@mui/material";
+import { Typography } from "@mui/joy";
 import SearchProduct from "./SearchProduct";
 import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from "react";
 import { useGetSearchedProductsQuery } from "../api/UserApi";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -14,16 +16,20 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 const Search = () => {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = useState("");
-  const { data, error, isLoading, refetch } = useGetSearchedProductsQuery({
+  const { data, isLoading, refetch, isError } = useGetSearchedProductsQuery({
     search,
   });
+  const [wait, setWait] = useState(false);
 
-  console.log(search, data);
+  console.log(data, isLoading);
 
+  //debouncing the search with some delay
   useEffect(() => {
+    setWait(true);
     const getProducts = setTimeout(() => {
       refetch();
-    }, 5000);
+      setWait(false);
+    }, 2000);
     return () => clearTimeout(getProducts);
   }, [search, refetch]);
 
@@ -49,7 +55,6 @@ const Search = () => {
             <TextField
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              type="password"
               placeholder="Search here"
               variant="outlined"
               fullWidth
@@ -78,13 +83,47 @@ const Search = () => {
           </Grid>
         </Grid>
         <Divider />
-        <Grid container paddingY={3}>
-          <SearchProduct />
-          <SearchProduct />
-          <SearchProduct />
-          <SearchProduct />
-          <SearchProduct />
-        </Grid>
+        {search.trim().length === 0 ? (
+          <></>
+        ) : (
+          <>
+            {isLoading | wait ? (
+              <Grid
+                height="600px"
+                container
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <CircularProgress color="inherit" />
+              </Grid>
+            ) : (
+              !isError && (
+                <Grid container paddingY={3}>
+                  <Grid item mx={1} mb={2} xs={12}>
+                    <Typography>
+                      {data && data.products.length === 0
+                        ? "No results found"
+                        : "Related products"}
+                    </Typography>
+                  </Grid>
+                  {data &&
+                    data.products &&
+                    data.products.map((product) => (
+                      <SearchProduct
+                        key={product._id}
+                        img={product.itemAvailableImages[0]}
+                        name={product.itemName}
+                        itemDiscount={product.itemDiscount}
+                        itemPrice={product.itemPrice}
+                        searchText={search}
+                      />
+                    ))}
+                </Grid>
+              )
+            )}
+          </>
+        )}
       </Dialog>
     </>
   );

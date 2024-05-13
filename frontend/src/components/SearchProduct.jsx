@@ -1,14 +1,30 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 import { Grid } from "@mui/material";
 import { Typography } from "@mui/joy";
+import useGetPrice from "../hooks/useGetPrice";
 
-const SearchProduct = () => {
+const highlightSearchQuery = (text, query) => {
+  if (!query) return text;
+  const regex = new RegExp(`(${query})`, "gi");
+  return text.split(regex).map((part, index) =>
+    regex.test(part) ? (
+      <span key={index} style={{ color: "black" }}>
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+};
+
+const SearchProduct = ({ img, name, itemPrice, itemDiscount, searchText }) => {
+  const price = useGetPrice(itemPrice, itemDiscount);
   return (
     <Grid
       border={1}
       borderRadius={1}
       sx={{
-        width: "380px",
+        width: "363px",
         "&:hover": { cursor: "pointer", borderColor: "black" },
       }}
       borderColor="lightgrey"
@@ -20,17 +36,17 @@ const SearchProduct = () => {
     >
       <Grid item xs>
         <img
-          src="https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/106934/05/sv01/fnd/IND/fmt/png/Pressing-III-Unisex-Indoor-Court-Shoes"
+          src={img}
           style={{ width: "100px", height: "100px" }}
           alt="error"
         />
       </Grid>
       <Grid item xs={8.5} alignItems="center">
-        <Typography level="h4" sx={{ fontSize: "18px" }}>
-          Pressing III Unisex Indoor Court Shoes
+        <Typography level="h4" sx={{ fontSize: "18px", color:'darkgray' }}>
+          {highlightSearchQuery(name, searchText)}
         </Typography>
         <Typography level="h4" sx={{ fontSize: "18px" }}>
-          ₹3,799
+          {price}
         </Typography>
       </Grid>
     </Grid>
@@ -38,4 +54,3 @@ const SearchProduct = () => {
 };
 
 export default SearchProduct;
-
