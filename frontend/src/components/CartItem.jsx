@@ -37,7 +37,7 @@ const CartItem = () => {
           Vapor Gray-PUMA White
         </Typography>
         <Typography level="body-md" mb={1} sx={{ color: "rgb(108 108 108)" }}>
-          SIZE:{" "}
+          SIZE:
           <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>
             UK 6.5
           </Typography>
