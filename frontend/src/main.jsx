@@ -1,0 +1,18 @@
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
+import { store } from "./redux-store/store.js";
+import { Provider } from "react-redux";
+
+window.onclick = (e) => {
+  if (e.target.dataset.testid !== "PersonOutlinedIcon") {
+    const accountList = document.getElementById("accountList");
+    if (accountList) accountList.style.display = "none";
+  }
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
