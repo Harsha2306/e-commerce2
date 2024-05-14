@@ -17,10 +17,18 @@ const highlightSearchQuery = (text, query) => {
   );
 };
 
-const SearchProduct = ({ img, name, itemPrice, itemDiscount, searchText }) => {
+const SearchProduct = ({
+  img,
+  name,
+  itemPrice,
+  itemDiscount,
+  searchText,
+  onClick
+}) => {
   const price = useGetPrice(itemPrice, itemDiscount);
   return (
     <Grid
+      onClick={onClick}
       border={1}
       borderRadius={1}
       sx={{
@@ -42,7 +50,7 @@ const SearchProduct = ({ img, name, itemPrice, itemDiscount, searchText }) => {
         />
       </Grid>
       <Grid item xs={8.5} alignItems="center">
-        <Typography level="h4" sx={{ fontSize: "18px", color:'darkgray' }}>
+        <Typography level="h4" sx={{ fontSize: "18px", color: "darkgray" }}>
           {highlightSearchQuery(name, searchText)}
         </Typography>
         <Typography level="h4" sx={{ fontSize: "18px" }}>

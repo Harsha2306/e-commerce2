@@ -8,6 +8,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from "react";
 import { useGetSearchedProductsQuery } from "../api/UserApi";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useNavigate } from "react-router-dom";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -20,7 +21,7 @@ const Search = () => {
     search,
   });
   const [wait, setWait] = useState(false);
-
+  const navigateTo = useNavigate();
   console.log(data, isLoading);
 
   //debouncing the search with some delay
@@ -111,6 +112,14 @@ const Search = () => {
                     data.products &&
                     data.products.map((product) => (
                       <SearchProduct
+                        onClick={() => {
+                          setWait(true);
+                          navigateTo(`/products/${product._id}`);
+                          setTimeout(() => {
+                            setOpen(false);
+                            setWait(false);
+                          }, 2000);
+                        }}
                         key={product._id}
                         img={product.itemAvailableImages[0]}
                         name={product.itemName}
