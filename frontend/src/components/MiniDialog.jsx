@@ -32,7 +32,7 @@ const MiniDialog = ({
         PaperProps={{
           style: {
             width: "500px",
-            height: "365px",
+            height: "395px",
           },
         }}
         open={open}

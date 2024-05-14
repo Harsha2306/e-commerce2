@@ -32,5 +32,6 @@ router.post(
   userController.changePassword
 );
 router.get("/search", userController.search);
+router.get("/wishlist", isAuthorized, userController.getWishlist)
 
 module.exports = router;

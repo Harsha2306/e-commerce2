@@ -509,3 +509,40 @@ exports.search = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getWishlist = async (req, res, next) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    const wishlist = await Wishlist.findOne({ userId: userId }).populate({
+      path: "items.productId",
+      model: "product",
+    });
+    if (!wishlist)
+      throw handleError({
+        message: "No wishlist found",
+        statusCode: 404,
+        ok: false,
+      });
+    const wishlistProds = [];
+    wishlist.items.map((product) => {
+      let obj = {};
+      obj.name = product.productId.itemName;
+      const idx = product.productId.itemAvailableColors.findIndex(
+        (color) => color === product.color
+      );
+      obj.img = product.productId.itemAvailableImages[6 * idx];
+      wishlistProds.push(obj);
+      const {color, price, size} = product
+      obj.color = color;
+      obj.size = size;
+      obj.price = price;
+      obj._id = product._id
+    });
+    res.status(200).json({
+      ok: true,
+      wishlist: wishlistProds,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -57,6 +57,9 @@ export const userApi = createApi({
       query: (queryParams) =>
         `search?${new URLSearchParams(queryParams).toString()}`,
     }),
+    getWishlist: builder.query({
+      query: () => "/wishlist",
+    }),
   }),
 });
 
@@ -71,4 +74,5 @@ export const {
   useGetUserDetailsQuery,
   useChangePasswordMutation,
   useGetSearchedProductsQuery,
+  useGetWishlistQuery,
 } = userApi;
