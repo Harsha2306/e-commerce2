@@ -317,9 +317,9 @@ const ProductDetails = () => {
                       onClick={handleOpenWishlist}
                       variant="contained"
                       text={
-                        !isAddingToWihlist &&
+                        !isAddingToWihlist && checkIfProductPresentInWishlist &&
                         !checkIfProductPresentInWishlist.isLoading &&
-                        !checkIfProductPresentInWishlist.isError &&
+                        !checkIfProductPresentInWishlist.isError && checkIfProductPresentInWishlist.data &&
                         checkIfProductPresentInWishlist.data.addedToWishList
                           ? "added to wishlist"
                           : "add to wishlist"

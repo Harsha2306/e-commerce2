@@ -11,7 +11,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
 
-const CartItem = () => {
+const CartItem = (name, price, size, color, quantity) => {
   const [open, setOpen] = useState(false);
   const [qty, setQty] = useState("1");
 

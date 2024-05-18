@@ -532,15 +532,54 @@ exports.getWishlist = async (req, res, next) => {
       );
       obj.img = product.productId.itemAvailableImages[6 * idx];
       wishlistProds.push(obj);
-      const {color, price, size} = product
+      const { color, price, size } = product;
       obj.color = color;
       obj.size = size;
       obj.price = price;
-      obj._id = product._id
+      obj._id = product._id;
     });
     res.status(200).json({
       ok: true,
       wishlist: wishlistProds,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getCart = async (req, res, next) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    const cart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      model: "product",
+    });
+    if (!cart) {
+      throw handleError({
+        message: "No cart found",
+        statusCode: 404,
+        ok: false,
+      });
+    }
+    const cartItems = [];
+    cart.items.map((product) => {
+      let obj = {};
+      obj.name = product.productId.itemName;
+      const idx = product.productId.itemAvailableColors.findIndex(
+        (color) => color === product.color
+      );
+      obj.img = product.productId.itemAvailableImages[6 * idx];
+      cartItems.push(obj);
+      const { color, total, size } = product;
+      obj.color = color;
+      obj.size = size;
+      obj.price = total;
+      obj._id = product._id;
+      obj.quantity = product.quantity
+    });
+    res.status(200).json({
+      ok: true,
+      cart: { items: cartItems, totalPrice: cart.totalPrice },
     });
   } catch (error) {
     next(error);

@@ -60,6 +60,9 @@ export const userApi = createApi({
     getWishlist: builder.query({
       query: () => "/wishlist",
     }),
+    getCart: builder.query({
+      query: () => "/cart",
+    }),
   }),
 });
 
@@ -75,4 +78,5 @@ export const {
   useChangePasswordMutation,
   useGetSearchedProductsQuery,
   useGetWishlistQuery,
+  useGetCartQuery
 } = userApi;
