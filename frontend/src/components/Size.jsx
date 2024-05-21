@@ -1,4 +1,5 @@
-import React, { useContext } from "react";
+/* eslint-disable react/prop-types */
+import  { useContext } from "react";
 import { Grid, Typography } from "@mui/material";
 import { SizeContext } from "./ProductDetails";
 

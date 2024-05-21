@@ -14,7 +14,14 @@ router.get(
   userController.getRecommendedAndNewArrivals
 );
 router.post("/addToCart", isAuthorized, userController.addToCart);
+router.post("/removeFromCart", isAuthorized, userController.removeFromCart);
+router.post(
+  "/removeEntireItemFromCart",
+  isAuthorized,
+  userController.removeEntireItemFromCart
+);
 router.post("/addToWishlist", isAuthorized, userController.addToWishlist);
+router.post("/removeFromWishlist", isAuthorized, userController.removeFromWishlist);
 router.get(
   "/checkIfProductPresentInWishlist",
   isAuthorized,

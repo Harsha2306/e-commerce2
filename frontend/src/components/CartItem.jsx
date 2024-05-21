@@ -1,51 +1,106 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
-import { Grid, Chip } from "@mui/material";
+import { Grid, IconButton, Box } from "@mui/material";
 import StyledButton from "./StyledButton";
-import { Typography } from "@mui/joy";
+import { CircularProgress, Typography } from "@mui/joy";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import Select from "@mui/joy/Select";
-import Option from "@mui/joy/Option";
+import useFormattedPrice from "../hooks/useFormattedPrice";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import { useNavigate } from "react-router-dom";
+import {
+  useAddToCartMutation,
+  useRemoveFromCartMutation,
+  useRemoveEntireItemFromCartMutation,
+} from "../api/UserApi";
+import { setCartCount } from "../redux-store/userSlice";
+import { useDispatch } from "react-redux";
 
-const CartItem = (name, price, size, color, quantity) => {
+const CartItem = ({
+  name,
+  price,
+  size,
+  color,
+  quantity,
+  img,
+  _id,
+  refetch,
+  productId,
+}) => {
   const [open, setOpen] = useState(false);
-  const [qty, setQty] = useState("1");
+  const formattedPrice = useFormattedPrice(price);
+  const navigateTo = useNavigate();
+  const [increaseQty, { isLoading: isAdding }] = useAddToCartMutation();
+  const [decreaseQty, { isLoading: isRemoving }] = useRemoveFromCartMutation();
+  const [removeEntireItem, { isLoading: isRemovingEntireItem }] =
+    useRemoveEntireItemFromCartMutation();
+  const dispatch = useDispatch();
 
-  const onRemoveButtonClick = () => {};
-  const handleChange = (e) => {
-    setQty(e.target.textContent);
+  const onCartItemClick = () => {
+    navigateTo(`/products/${productId}`);
+  };
+
+  const onRemoveButtonClick = async () => {
+    const res = await removeEntireItem({
+      productId,
+      size,
+      color,
+    });
+    dispatch(setCartCount(res.data.cartLength));
+    if (!isRemovingEntireItem) setOpen(false);
+    refetch();
+  };
+
+  const handleIncrement = async () => {
+    const res = await increaseQty({
+      productId,
+      size,
+      color,
+    });
+    dispatch(setCartCount(res.data.cartLength));
+    refetch();
+  };
+
+  const handleDecrement = async () => {
+    const res = await decreaseQty({
+      productId,
+      size,
+      color,
+    });
+    dispatch(setCartCount(res.data.cartLength));
+    refetch();
   };
 
   return (
     <Grid border={1.5} borderColor="lightgray" mb={3} container item xs={12}>
       <Grid padding={2} xs={3} item>
-        <img
-          src="https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/393771/06/sv01/fnd/IND/fmt/png/RS-X-Efekt-Lux-Women's-Sneakers"
-          alt="error"
-          style={{ width: "100%", height: "100%" }}
-        />
+        <img src={img} alt="error" style={{ width: "100%", height: "100%" }} />
       </Grid>
       <Grid xs ml={2} padding={2} item>
-        <Typography level="title-lg" sx={{ fontSize: "20px" }}>
-          RS-X Efekt Lux Women's Sneakers
+        <Typography
+          level="title-lg"
+          sx={{ fontSize: "20px", "&:hover": { cursor: "pointer" } }}
+          onClick={onCartItemClick}
+        >
+          {name}
         </Typography>
         <Typography mb={2} level="body-lg" sx={{ color: "rgb(108 108 108)" }}>
-          Vapor Gray-PUMA White
+          {color}
         </Typography>
         <Typography level="body-md" mb={1} sx={{ color: "rgb(108 108 108)" }}>
           SIZE:
           <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>
-            UK 6.5
+            {size}
           </Typography>
         </Typography>
         <Typography mb={1} level="body-md" sx={{ color: "rgb(108 108 108)" }}>
           PRICE:
           <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>
-            ₹11,999
+            {formattedPrice}
           </Typography>
         </Typography>
         <Grid mb={1} columnSpacing={1} container>
@@ -71,39 +126,30 @@ const CartItem = (name, price, size, color, quantity) => {
                 Are you sure you want to remove this item?
               </DialogTitle>
               <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                  <Grid container>
-                    <Grid xs={3} item>
-                      <img
-                        src="https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_2000,h_2000/global/393771/06/sv01/fnd/IND/fmt/png/RS-X-Efekt-Lux-Women's-Sneakers"
-                        alt="error"
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </Grid>
-                    <Grid ml={2} xs padding={2} item>
-                      <Typography level="title-lg" sx={{ fontSize: "20px" }}>
-                        RS-X Efekt Lux Women's Sneakers
-                      </Typography>
-                      <Typography mb={2} level="body-sm">
-                        Vapor Gray-PUMA White
-                      </Typography>
-                      <Typography
-                        level="body-md"
-                        mb={1}
-                        sx={{ color: "black" }}
-                      >
-                        SIZE: <Typography level="body-sm">UK 6.5</Typography>
-                      </Typography>
-                      <Typography
-                        mb={1}
-                        level="body-md"
-                        sx={{ color: "black" }}
-                      >
-                        PRICE: <Typography level="body-sm">₹11,999</Typography>
-                      </Typography>
-                    </Grid>
+                <Grid container>
+                  <Grid xs={3} item>
+                    <img
+                      src={img}
+                      alt="error"
+                      style={{ width: "100%", height: "100%" }}
+                    />
                   </Grid>
-                </DialogContentText>
+                  <Grid ml={2} xs padding={2} item>
+                    <Typography level="title-lg" sx={{ fontSize: "20px" }}>
+                      {name}
+                    </Typography>
+                    <Typography mb={2} level="body-sm">
+                      {color}
+                    </Typography>
+                    <Typography level="body-md" mb={1} sx={{ color: "black" }}>
+                      SIZE: <Typography level="body-sm">{size}</Typography>
+                    </Typography>
+                    <Typography mb={1} level="body-md" sx={{ color: "black" }}>
+                      PRICE:
+                      <Typography level="body-sm">{formattedPrice}</Typography>
+                    </Typography>
+                  </Grid>
+                </Grid>
               </DialogContent>
               <DialogActions>
                 <StyledButton
@@ -113,8 +159,13 @@ const CartItem = (name, price, size, color, quantity) => {
                   color="white"
                   backgroundColor="black"
                   hoverStyles={{ color: "white", backgroundColor: "black" }}
-                  text="remove"
+                  text={!isRemovingEntireItem && "remove"}
                   onClick={onRemoveButtonClick}
+                  startIcon={
+                    isRemovingEntireItem && (
+                      <CircularProgress size="sm" color="neutral" />
+                    )
+                  }
                 />
                 <StyledButton
                   variant="contained"
@@ -129,7 +180,7 @@ const CartItem = (name, price, size, color, quantity) => {
               </DialogActions>
             </Dialog>
           </Grid>
-          <Grid display="flex" alignItems="center" item>
+          {/* <Grid display="flex" alignItems="center" item>
             <Chip
               sx={{
                 fontWeight: "700",
@@ -146,18 +197,40 @@ const CartItem = (name, price, size, color, quantity) => {
               color="error"
               variant="outlined"
             />
-          </Grid>
-          <Grid display="flex" alignItems="center" item>
-            <Select
-              sx={{ border: "1px solid darkgray" }}
-              value={qty}
-              onChange={handleChange}
-              variant="plain"
-            >
-              <Option value="1">1</Option>
-              <Option value="2">2</Option>
-              <Option value="3">3</Option>
-            </Select>
+          </Grid> */}
+          <Grid item>
+            <Box display="flex" alignItems="center">
+              {isRemoving ? (
+                <CircularProgress color="neutral" size="sm" />
+              ) : (
+                <IconButton
+                  onClick={handleDecrement}
+                  disabled={quantity <= 1}
+                  style={{ color: quantity <= 1 ? "darkgray" : "black" }}
+                >
+                  <RemoveIcon />
+                </IconButton>
+              )}
+              <Typography
+                variant="h6"
+                style={{
+                  minWidth: "30px",
+                  textAlign: "center",
+                }}
+              >
+                {quantity}
+              </Typography>
+              {isAdding ? (
+                <CircularProgress color="neutral" size="sm" />
+              ) : (
+                <IconButton
+                  onClick={handleIncrement}
+                  style={{ color: "black" }}
+                >
+                  <AddIcon />
+                </IconButton>
+              )}
+            </Box>
           </Grid>
         </Grid>
       </Grid>

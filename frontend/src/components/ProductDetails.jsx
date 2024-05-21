@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
 import { Grid, Typography } from "@mui/material";
 import Size from "./Size";
 import StyledButton from "./StyledButton";
@@ -20,6 +20,8 @@ import { useNavigate } from "react-router-dom";
 import CircularProgressJ from "@mui/joy/CircularProgress";
 import SessionExpiredAlert from "./SessionExpiredAlert";
 import { useLocation } from "react-router-dom";
+import { setCartCount } from "../redux-store/userSlice";
+import { useDispatch } from "react-redux";
 
 export const SizeContext = createContext();
 export const ColorContext = createContext();
@@ -62,6 +64,7 @@ const ProductDetails = () => {
   const [showAlert, setShowAlert] = useState(false);
   const navigateTo = useNavigate();
   const { pathname } = useLocation();
+  const dispatch = useDispatch();
   let hasDiscount = undefined;
   let discountedPrice;
 
@@ -107,6 +110,7 @@ const ProductDetails = () => {
       size: selectedSize,
       color: selectedColor,
     });
+    console.log(res)
     setIsAdding(false);
     if (res.error) {
       if (res.error.status === 401) navigateTo("/login");
@@ -120,6 +124,7 @@ const ProductDetails = () => {
       setHeading("Added to Cart");
       setButtonText("view cart & checkout");
       setOpenMiniDialog(true);
+      dispatch(setCartCount(res.data.cartLength))
     }
   };
 

@@ -156,6 +156,7 @@ exports.getProductById = async (req, res, next) => {
         ok: false,
       });
     }
+    console.log(product);
     const colorsWithImages = [];
     product.itemAvailableColors.map((color, idx) => {
       let colorWithImage = {};
@@ -287,6 +288,125 @@ exports.addToCart = async (req, res, next) => {
     }
     res.status(201).json({
       ok: true,
+      cartLength: updatedCart.items.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.removeFromCart = async (req, res, next) => {
+  try {
+    const productId = new mongoose.Types.ObjectId(req.body.productId);
+    const { size, color } = req.body;
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    let cart = await Cart.findOne({ userId });
+    if (!cart)
+      throw handleError({
+        message: "No cart found",
+        statusCode: 404,
+        ok: false,
+      });
+    const product = await Product.findOne({ _id: productId });
+    if (!product) {
+      throw handleError({
+        message: "No product found",
+        statusCode: 404,
+        ok: false,
+      });
+    }
+    const requiredItemIdx = cart.items.findIndex(
+      (item) =>
+        item.productId.toString() === productId.toString() &&
+        item.size === size &&
+        item.color === color
+    );
+    if (requiredItemIdx === -1) {
+      return res.status(404).json({
+        message: "Item not found in cart",
+        ok: false,
+      });
+    }
+    const unitPrice =
+      cart.items[requiredItemIdx].total / cart.items[requiredItemIdx].quantity;
+    if (cart.items[requiredItemIdx].quantity === 1)
+      cart.items.splice(requiredItemIdx, 1);
+    else {
+      cart.items[requiredItemIdx].quantity--;
+      cart.items[requiredItemIdx].total =
+        cart.items[requiredItemIdx].price *
+        cart.items[requiredItemIdx].quantity;
+    }
+    cart.totalPrice -= unitPrice;
+    const updatedCart = await cart.save();
+    if (!updatedCart)
+      throw handleError({
+        message: "updated cart not saved",
+        statusCode: 500,
+        ok: false,
+      });
+    if (updatedCart.items.length === 0)
+      await Cart.deleteOne({
+        _id: updatedCart._id,
+      });
+    res.status(200).json({
+      ok: true,
+      cartLength: updatedCart.items.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.removeEntireItemFromCart = async (req, res, next) => {
+  try {
+    const productId = new mongoose.Types.ObjectId(req.body.productId);
+    const { size, color } = req.body;
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    let cart = await Cart.findOne({ userId });
+    if (!cart)
+      throw handleError({
+        message: "No cart found",
+        statusCode: 404,
+        ok: false,
+      });
+    const product = await Product.findOne({ _id: productId });
+    if (!product) {
+      throw handleError({
+        message: "No product found",
+        statusCode: 404,
+        ok: false,
+      });
+    }
+    const requiredItemIdx = cart.items.findIndex(
+      (item) =>
+        item.productId.toString() === productId.toString() &&
+        item.size === size &&
+        item.color === color
+    );
+    if (requiredItemIdx === -1) {
+      throw handleError({
+        message: "Item not found in cart",
+        statusCode: 404,
+        ok: false,
+      });
+    }
+    cart.totalPrice -= cart.items[requiredItemIdx].total;
+    cart.items.splice(requiredItemIdx, 1);
+    const updatedCart = await cart.save();
+    if (!updatedCart)
+      throw handleError({
+        message: "unable to save cart",
+        statusCode: 500,
+        ok: false,
+      });
+    if (updatedCart.items.length === 0)
+      await Cart.deleteOne({
+        _id: updatedCart._id,
+      });
+    res.status(200).json({
+      ok: true,
+      cartLength: updatedCart.items.length,
     });
   } catch (error) {
     next(error);
@@ -329,18 +449,54 @@ exports.addToWishlist = async (req, res, next) => {
         size,
         color,
       });
-      const updatedWishlist = await wishlist.save();
-      if (!updatedWishlist) {
-        throw handleError({
-          message: "Can't update Wishlist",
-          statusCode: 500,
-          ok: false,
-        });
-      }
+    }
+    const updatedWishlist = await wishlist.save();
+    if (!updatedWishlist) {
+      throw handleError({
+        message: "Can't update Wishlist",
+        statusCode: 500,
+        ok: false,
+      });
     }
     res.status(201).json({
       ok: true,
+      wishlistLength: updatedWishlist.items.length,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.removeFromWishlist = async (req, res, next) => {
+  try {
+    const itemId = new mongoose.Types.ObjectId(req.body.productId);
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    let wishlist = await Wishlist.findOne({ userId });
+    if (!wishlist) {
+      throw handleError({
+        message: "No wishlist found",
+        statusCode: 404,
+        ok: false,
+      });
+    }
+    const itemIdx = wishlist.items.findIndex(
+      (item) => itemId.toString() === item._id.toString()
+    );
+    if (itemIdx === -1)
+      throw handleError({
+        message: "No item found in wishlist",
+        statusCode: 404,
+        ok: false,
+      });
+    wishlist.items.splice(itemIdx, 1);
+    const updatedWishlist = await wishlist.save();
+    res.status(200).json({
+      ok: true,
+      wishlistLength: updatedWishlist.items.length,
+    });
+    if (updatedWishlist.items.length === 0) {
+      await Wishlist.findByIdAndDelete(updatedWishlist._id);
+    }
   } catch (error) {
     next(error);
   }
@@ -523,20 +679,21 @@ exports.getWishlist = async (req, res, next) => {
         statusCode: 404,
         ok: false,
       });
-    const wishlistProds = [];
-    wishlist.items.map((product) => {
-      let obj = {};
-      obj.name = product.productId.itemName;
-      const idx = product.productId.itemAvailableColors.findIndex(
+    const wishlistProds = wishlist.items.map((product) => {
+      const productInfo = product.productId;
+      const idx = productInfo.itemAvailableColors.findIndex(
         (color) => color === product.color
       );
-      obj.img = product.productId.itemAvailableImages[6 * idx];
-      wishlistProds.push(obj);
-      const { color, price, size } = product;
-      obj.color = color;
-      obj.size = size;
-      obj.price = price;
-      obj._id = product._id;
+      const img = idx !== -1 ? productInfo.itemAvailableImages[6 * idx] : null;
+      return {
+        _id: product._id,
+        productId: productInfo._id,
+        name: productInfo.itemName,
+        img,
+        color: product.color,
+        size: product.size,
+        price: product.price,
+      };
     });
     res.status(200).json({
       ok: true,
@@ -561,21 +718,20 @@ exports.getCart = async (req, res, next) => {
         ok: false,
       });
     }
-    const cartItems = [];
-    cart.items.map((product) => {
-      let obj = {};
-      obj.name = product.productId.itemName;
-      const idx = product.productId.itemAvailableColors.findIndex(
-        (color) => color === product.color
+    const cartItems = cart.items.map((item) => {
+      const idx = item.productId.itemAvailableColors.findIndex(
+        (color) => color === item.color
       );
-      obj.img = product.productId.itemAvailableImages[6 * idx];
-      cartItems.push(obj);
-      const { color, total, size } = product;
-      obj.color = color;
-      obj.size = size;
-      obj.price = total;
-      obj._id = product._id;
-      obj.quantity = product.quantity
+      return {
+        name: item.productId.itemName,
+        img: item.productId.itemAvailableImages[6 * idx],
+        color: item.color,
+        size: item.size,
+        price: item.total,
+        _id: item._id,
+        quantity: item.quantity,
+        productId: item.productId._id,
+      };
     });
     res.status(200).json({
       ok: true,

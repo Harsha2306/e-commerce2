@@ -3,37 +3,56 @@ import { Typography, Divider } from "@mui/joy";
 import WishlistItem from "../components/WishListItem";
 import { useGetWishlistQuery } from "../api/UserApi";
 import CircularProgress from "@mui/joy/CircularProgress";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import SessionExpiredAlert from "../components/SessionExpiredAlert";
 
 const WishlistPage = () => {
   let { data, isLoading, error, isError, refetch } = useGetWishlistQuery();
+  const [wishlist, setWishlist] = useState([]);
+  const [empty, setEmpty] = useState(false);
   const navigateTo = useNavigate();
-
-  console.log(isError, error);
+  const location = useLocation();
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (
-      isError &&
-      (error.data.message === "Not Authorized" ||
-        error.data.message === "jwt expired")
-    ) {
-      navigateTo("/login");
+    if (!isError && !isLoading && data) {
+      console.log(data.wishlist);
+      setWishlist(data.wishlist);
+      setEmpty(data.wishlist.length === 0);
     }
-    if (data && data.ok) {
-      refetch();
+    if (isError) {
+      if (error.data.message === "Not Authorized") {
+        navigateTo("/login");
+      } else if (error.data.message === "No wishlist found") setEmpty(true);
+      else if (error.data.message === "jwt expired") {
+        setShow(true);
+        setTimeout(() => {
+          navigateTo("/login");
+        }, 2000);
+      }
     }
-  }),
-    [isError, error, navigateTo, data];
+  }, [isError, isLoading, error, navigateTo, data]);
+
+  useEffect(() => {
+    refetch();
+  }, [location, refetch]);
+
+  if (isLoading)
+    return (
+      <Grid paddingY={10} display="flex" justifyContent="center">
+        <CircularProgress color="neutral" size="lg" />
+      </Grid>
+    );
 
   return (
     <>
-      {isLoading && (
-        <Grid paddingY={10} display="flex" justifyContent="center">
-          <CircularProgress color="neutral" size="lg" />
+      {!isLoading && isError && (
+        <Grid mt={5}>
+          <SessionExpiredAlert show={show} />
         </Grid>
       )}
-      {!isLoading && (
+      {!isLoading && !isError && (
         <Grid
           item
           mt={15}
@@ -45,26 +64,28 @@ const WishlistPage = () => {
             MY WISHLIST
           </Typography>
           <Divider sx={{ marginY: "1rem" }} />
-          {isError &&
-            !error.data.ok &&
-            error.data.message === "No wishlist found" && (
-              <Typography
-                level="title-lg"
-                sx={{ fontSize: "30px", textAlign: "center" }}
-              >
-                Your Wishlist is Empty
-              </Typography>
-            )}
-          {!isError && data && data.wishlist.length !== 0 && (
+          {empty && (
+            <Typography
+              level="title-lg"
+              sx={{ fontSize: "30px", textAlign: "center" }}
+            >
+              Your Wishlist is Empty
+            </Typography>
+          )}
+          {!empty && (
             <Grid rowSpacing={2} container>
-              {data.wishlist.map((product) => (
+              {wishlist.map((product) => (
                 <WishlistItem
+                  _id={product._id}
                   key={product._id}
                   name={product.name}
                   price={product.price}
                   size={product.size}
                   color={product.color}
                   img={product.img}
+                  productId={product.productId}
+                  refetch={refetch}
+                  length={wishlist.length}
                 />
               ))}
             </Grid>

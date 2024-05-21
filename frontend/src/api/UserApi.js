@@ -36,9 +36,30 @@ export const userApi = createApi({
         body: productDetails,
       }),
     }),
+    removeFromCart: builder.mutation({
+      query: (productDetails) => ({
+        url: `/removeFromCart`,
+        method: "post",
+        body: productDetails,
+      }),
+    }),
+    removeEntireItemFromCart: builder.mutation({
+      query: (productDetails) => ({
+        url: `/removeEntireItemFromCart`,
+        method: "post",
+        body: productDetails,
+      }),
+    }),
     addToWishlist: builder.mutation({
       query: (productDetails) => ({
         url: "/addToWishlist",
+        method: "post",
+        body: productDetails,
+      }),
+    }),
+    removeFromWishlist: builder.mutation({
+      query: (productDetails) => ({
+        url: "/removeFromWishlist",
         method: "post",
         body: productDetails,
       }),
@@ -78,5 +99,8 @@ export const {
   useChangePasswordMutation,
   useGetSearchedProductsQuery,
   useGetWishlistQuery,
-  useGetCartQuery
+  useGetCartQuery,
+  useRemoveFromCartMutation,
+  useRemoveEntireItemFromCartMutation,
+  useRemoveFromWishlistMutation
 } = userApi;

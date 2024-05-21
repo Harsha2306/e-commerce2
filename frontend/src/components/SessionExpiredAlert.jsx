@@ -1,4 +1,4 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 import LinearProgress from "@mui/joy/LinearProgress";
 import Alert from "@mui/joy/Alert";
 import { Typography } from "@mui/material";
@@ -19,14 +19,14 @@ const SessionExpiredAlert = ({ show }) => {
           }}
         >
           <div>
-            <Typography level="title-lg">Alert</Typography>
+            <Typography level="title-lg">ALERT</Typography>
             <Typography level="body-sm">
               Previous session has been expired. Redirecting you to Login page
             </Typography>
           </div>
           <LinearProgress
             variant="solid"
-            color="success"
+            color="danger"
             value={40}
             sx={{
               position: "absolute",

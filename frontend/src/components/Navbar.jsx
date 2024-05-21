@@ -9,11 +9,15 @@ import { toggle } from "../redux-store/AccountIconSlice";
 import { Outlet } from "react-router-dom";
 import AccountList from "./AccountList";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Search from "./Search";
 import Footer from "../components/Footer";
 
 const Navbar = () => {
   const navigateTo = useNavigate();
+  const cartCount = useSelector((state) => state.user.cartCount);
+  const wishlistCount = useSelector((state) => state.user.wishlistCount);
+
   const profileClickHandler = () => {
     document.getElementById("accountList").style.display = "block";
   };
@@ -47,12 +51,12 @@ const Navbar = () => {
             <Search />
           </NavIconItem>
           <NavIconItem>
-            <Badge badgeContent={2} size="sm" invisible={false} color="danger">
+            <Badge badgeContent={wishlistCount} size="sm" invisible={false} color="danger">
               <FavoriteIcon onClick={() => navigateTo("/wishlist")} />
             </Badge>
           </NavIconItem>
           <NavIconItem>
-            <Badge badgeContent={5} size="sm" invisible={false} color="danger">
+            <Badge badgeContent={cartCount} size="sm" invisible={false} color="danger">
               <ShoppingCartIcon onClick={cartClickHandler} />
             </Badge>
           </NavIconItem>

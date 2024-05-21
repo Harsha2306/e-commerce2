@@ -5,11 +5,13 @@ import { authApi } from "../api/AuthApi";
 import { adminApi } from "../api/AdminApi";
 import { userApi } from "../api/UserApi";
 import tokenSliceReducer from "./TokenSlice";
+import userSliceReducer from "./userSlice";
 
 export const store = configureStore({
   reducer: {
     accountList: accountListReducer,
     token: tokenSliceReducer,
+    user: userSliceReducer,
     [authApi.reducerPath]: authApi.reducer,
     [adminApi.reducerPath]: adminApi.reducer,
     [userApi.reducerPath]: userApi.reducer,

@@ -1,4 +1,6 @@
 const User = require("../models/user");
+const Cart = require("../models/cart");
+const Wishlist = require("../models/wishlist");
 const { handleError } = require("../util/handleError");
 
 const jwt = require("jsonwebtoken");
@@ -98,10 +100,16 @@ exports.login = async (req, res, next) => {
         //expiresIn: 60,
       }
     );
+    const cart = await Cart.findOne({ userId: user._id });
+    const wishlist = await Wishlist.findOne({ userId: user._id });
+    const cartCount = cart ? cart.items.length : 0;
+    const wishlistCount = wishlist ? wishlist.items.length : 0;
     console.log(token);
     res.status(200).json({
       token,
       ok: true,
+      cartCount,
+      wishlistCount,
     });
   } catch (error) {
     next(error);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Grid, TextField } from "@mui/material";
 import { Typography } from "@mui/joy";
 import StyledButton from "../components/StyledButton";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { useDispatch } from "react-redux";
 import { setToken, setLogin } from "../redux-store/TokenSlice";
+import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -87,6 +88,8 @@ const LoginPage = () => {
       localStorage.setItem("token", res.data.token);
       dispatch(setToken(res.data.token));
       dispatch(setLogin(true));
+      dispatch(setCartCount(res.data.cartCount));
+      dispatch(setWishlistCount(res.data.wishlistCount));
       navigateTo("/");
     }
     setIsLoading(false);
