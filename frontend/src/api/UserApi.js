@@ -18,7 +18,8 @@ export const userApi = createApi({
       query: () => `orders`,
     }),
     getProductById: builder.query({
-      query: (productId) => `product/${productId}`,
+      query: (queryParams) =>
+        `product?${new URLSearchParams(queryParams).toString()}`,
     }),
     getCheckIfProductPresentInWishlist: builder.query({
       query: (queryParams) =>
@@ -102,5 +103,5 @@ export const {
   useGetCartQuery,
   useRemoveFromCartMutation,
   useRemoveEntireItemFromCartMutation,
-  useRemoveFromWishlistMutation
+  useRemoveFromWishlistMutation,
 } = userApi;

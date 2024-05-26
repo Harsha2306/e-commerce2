@@ -22,8 +22,7 @@ const Search = () => {
   });
   const [wait, setWait] = useState(false);
   const navigateTo = useNavigate();
-  console.log(data, isLoading);
-
+  
   //debouncing the search with some delay
   useEffect(() => {
     setWait(true);

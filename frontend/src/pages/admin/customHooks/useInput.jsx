@@ -29,6 +29,7 @@ const useInput = (pattern, errMsg, validate) => {
     reset,
     setInputError,
     setInputErrorMessage,
+    setInput
   ];
 };
 

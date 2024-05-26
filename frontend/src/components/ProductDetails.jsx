@@ -22,6 +22,9 @@ import SessionExpiredAlert from "./SessionExpiredAlert";
 import { useLocation } from "react-router-dom";
 import { setCartCount } from "../redux-store/userSlice";
 import { useDispatch } from "react-redux";
+import useGetPrice from "../hooks/useGetPrice";
+import useFormattedPrice from "../hooks/useFormattedPrice";
+import {setWishlistCount} from '../redux-store/userSlice'
 
 export const SizeContext = createContext();
 export const ColorContext = createContext();
@@ -42,76 +45,67 @@ const colorValueStyles = {
 
 const ProductDetails = () => {
   const { productId } = useParams();
-  const [imgIndex, setImgIndex] = useState(0);
-  const [colors, setColors] = useState([]);
+  const navigateTo = useNavigate();
+  const { pathname } = useLocation();
+  const dispatch = useDispatch();
+
+  const [product, setProduct] = useState({});
+  const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
   const [openMiniDialog, setOpenMiniDialog] = useState(false);
   const [heading, setHeading] = useState("");
   const [buttonText, setButtonText] = useState("");
-  const [sizes, setSizes] = useState([]);
-  const [selectedSize, setSelectedSize] = useState(sizes[imgIndex]);
-  const { data, isError, isLoading, error } = useGetProductByIdQuery(productId);
+
+  const {
+    data,
+    isError: getProductError,
+    isLoading: getProductLoading,
+    error,
+  } = useGetProductByIdQuery({ productId });
+  const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
+  const [addToWishlist, { isLoading: isAddingToWishlist }] =
+    useAddToWishlistMutation();
   const checkIfProductPresentInWishlist =
     useGetCheckIfProductPresentInWishlistQuery({
       productId,
       selectedSize,
       selectedColor,
     });
-  const [addToCart] = useAddToCartMutation();
-  const [addToWishlist] = useAddToWishlistMutation();
-  const [isAdding, setIsAdding] = useState(false);
-  const [isAddingToWihlist, setIsAddingToWishlist] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const navigateTo = useNavigate();
-  const { pathname } = useLocation();
-  const dispatch = useDispatch();
-  let hasDiscount = undefined;
-  let discountedPrice;
+
+  useEffect(() => {
+    if (data && !getProductLoading) {
+      if (!getProductError) {
+        setProduct(data.product);
+        setSelectedSize(data.product.itemAvailableSizes?.[0] || "");
+        setSelectedColor(data.product.itemAvailableColors?.[0] || "");
+      }
+    }
+  }, [getProductLoading, data, getProductError, product]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  useEffect(() => {
-    if (data && data.ok) {
-      setSizes(data.product.itemAvailableSizes);
-      setSelectedSize(sizes[0]);
-      setColors(data.colorsWithImages);
-      setSelectedColor(data.colorsWithImages[0].color);
-    }
-  }, [data, sizes]);
-
-  useEffect(() => {
-    colors &&
-      colors.map((clr, idx) => {
-        if (clr.color === selectedColor) {
-          setImgIndex(idx);
-          return;
-        }
-      });
-  }, [selectedColor]);
-
-  if (data && data.product) {
-    hasDiscount = data.product.itemDiscount === 0 ? false : true;
-    if (hasDiscount) {
-      discountedPrice = Math.round(
-        data.product.itemPrice -
-          data.product.itemPrice * (data.product.itemDiscount / 100)
-      );
-    }
-  }
+  const imgIndex = data?.colorsWithImages?.findIndex(
+    (clr) => clr.color === selectedColor
+  );
+  const hasDiscount = product.itemDiscount === 0 ? false : true;
+  const formattedDiscountPrice = useGetPrice(
+    product.itemPrice,
+    product.itemDiscount
+  );
+  const formattedItemPrice = useFormattedPrice(product.itemPrice);
+  console.log(selectedSize, selectedColor, imgIndex);
 
   const handleClose = () => setOpenMiniDialog(false);
   const handleOpenCart = async () => {
     // TODO check jwt expired case for every api call
-    setIsAdding(true);
     const res = await addToCart({
       productId,
       size: selectedSize,
       color: selectedColor,
     });
-    console.log(res)
-    setIsAdding(false);
     if (res.error) {
       if (res.error.status === 401) navigateTo("/login");
       else if (res.error.data.message === "jwt expired") {
@@ -124,18 +118,16 @@ const ProductDetails = () => {
       setHeading("Added to Cart");
       setButtonText("view cart & checkout");
       setOpenMiniDialog(true);
-      dispatch(setCartCount(res.data.cartLength))
+      dispatch(setCartCount(res.data.cartLength));
     }
   };
 
   const handleOpenWishlist = async () => {
-    setIsAddingToWishlist(true);
     const res = await addToWishlist({
       productId,
       size: selectedSize,
       color: selectedColor,
     });
-    setIsAddingToWishlist(false);
     if (res.error) {
       if (res.error.status === 401) navigateTo("/login");
       else if (res.error.data.message === "jwt expired") setShowAlert(true);
@@ -146,13 +138,14 @@ const ProductDetails = () => {
       setHeading("Added to Wishlist");
       setButtonText("view wishlist");
       setOpenMiniDialog(true);
+      dispatch(setWishlistCount(res.data.wishlistLength));
       checkIfProductPresentInWishlist.refetch();
     }
   };
 
   return (
     <>
-      {isLoading && (
+      {getProductLoading && (
         <Grid
           height="600px"
           container
@@ -163,8 +156,8 @@ const ProductDetails = () => {
           <CircularProgress color="inherit" />
         </Grid>
       )}
-      {!isLoading && <SessionExpiredAlert show={showAlert} />}
-      {!isLoading && !isError && (
+      {!getProductLoading && <SessionExpiredAlert show={showAlert} />}
+      {!getProductLoading && !getProductError && (
         <>
           <Grid mt={showAlert ? 3 : 15} marginLeft={4}>
             <Breadcrumbs>
@@ -178,46 +171,36 @@ const ProductDetails = () => {
               >
                 <Typography variant="body1">Men</Typography>
               </Link>
-              <Typography variant="body1">{data.product.itemName}</Typography>
+              <Typography variant="body1">{product.itemName}</Typography>
             </Breadcrumbs>
           </Grid>
           <Grid marginX={3}>
             <Grid height="100%" width="100%" container sx={{ marginX: 0 }}>
               <Grid item direction="row" container xs={8}>
-                <>
-                  <ImgContainer
-                    left={
-                      colors && colors[imgIndex] && colors[imgIndex].imgs[0]
-                    }
-                    right={
-                      colors && colors[imgIndex] && colors[imgIndex].imgs[1]
-                    }
-                    isLoading={isLoading}
-                  />
-                  <ImgContainer
-                    left={
-                      colors && colors[imgIndex] && colors[imgIndex].imgs[2]
-                    }
-                    right={
-                      colors && colors[imgIndex] && colors[imgIndex].imgs[3]
-                    }
-                    isLoading={isLoading}
-                  />
-                  <ImgContainer
-                    left={
-                      colors && colors[imgIndex] && colors[imgIndex].imgs[4]
-                    }
-                    right={
-                      colors && colors[imgIndex] && colors[imgIndex].imgs[5]
-                    }
-                    isLoading={isLoading}
-                  />
-                </>
+                {data && data.colorsWithImages && imgIndex >= 0 && (
+                  <>
+                    <ImgContainer
+                      left={data.colorsWithImages[imgIndex].imgs[0]}
+                      right={data.colorsWithImages[imgIndex].imgs[1]}
+                      isLoading={getProductLoading}
+                    />
+                    <ImgContainer
+                      left={data.colorsWithImages[imgIndex].imgs[2]}
+                      right={data.colorsWithImages[imgIndex].imgs[3]}
+                      isLoading={getProductLoading}
+                    />
+                    <ImgContainer
+                      left={data.colorsWithImages[imgIndex].imgs[4]}
+                      right={data.colorsWithImages[imgIndex].imgs[5]}
+                      isLoading={getProductLoading}
+                    />
+                  </>
+                )}
               </Grid>
               <Grid item direction="column" container marginX={2} xs>
                 <Grid item>
                   <Typography padding={1} variant="h4">
-                    {data.product.itemName}
+                    {product.itemName}
                   </Typography>
                 </Grid>
                 {hasDiscount && (
@@ -232,11 +215,7 @@ const ProductDetails = () => {
                           'FFDINforPuma, Inter, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
                       }}
                     >
-                      {new Intl.NumberFormat("en-IN", {
-                        style: "currency",
-                        currency: "INR",
-                        minimumFractionDigits: 0,
-                      }).format(discountedPrice)}
+                      {formattedDiscountPrice}
                     </p>
                   </Grid>
                 )}
@@ -251,11 +230,7 @@ const ProductDetails = () => {
                         'FFDINforPuma, Inter, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
                     }}
                   >
-                    {new Intl.NumberFormat("en-IN", {
-                      style: "currency",
-                      currency: "INR",
-                      minimumFractionDigits: 0,
-                    }).format(data.product.itemPrice)}
+                    {formattedItemPrice}
                   </p>
                 </Grid>
                 <Grid paddingTop={2} paddingX={1} item>
@@ -275,8 +250,9 @@ const ProductDetails = () => {
                       <p style={colorValueStyles}>{selectedColor}</p>
                     </Grid>
                     <Grid container xs={12} item>
-                      {colors &&
-                        colors.map((clr) => (
+                      {data &&
+                        data.colorsWithImages &&
+                        data.colorsWithImages.map((clr) => (
                           <ProductColorImage
                             key={clr.color}
                             colorValue={clr.color}
@@ -288,21 +264,23 @@ const ProductDetails = () => {
                 </ColorContext.Provider>
                 <hr style={{ margin: "0px 0px 0px 8px" }} />
                 <Grid item direction="row" container paddingX={1} paddingY={3}>
-                  <SizeContext.Provider
-                    value={{ selectedSize, setSelectedSize }}
-                  >
-                    {data.product.itemAvailableSizes &&
-                      data.product.itemAvailableSizes.map((size) => (
-                        <Size productSize={size} key={size} />
-                      ))}
-                  </SizeContext.Provider>
+                  {selectedSize !== "" && (
+                    <SizeContext.Provider
+                      value={{ selectedSize, setSelectedSize }}
+                    >
+                      {data.product.itemAvailableSizes &&
+                        data.product.itemAvailableSizes.map((size) => (
+                          <Size productSize={size} key={size} />
+                        ))}
+                    </SizeContext.Provider>
+                  )}
                 </Grid>
                 <Grid mb={2} item padding={1} container>
                   <Grid xs item>
                     <StyledButton
                       margin="0px 0px 15px 0px"
                       variant="contained"
-                      text={!isAdding && "add to cart"}
+                      text={!isAddingToCart && "add to cart"}
                       width="100%"
                       height="40px"
                       color="white"
@@ -312,7 +290,7 @@ const ProductDetails = () => {
                         backgroundColor: "black",
                       }}
                       startIcon={
-                        isAdding && (
+                        isAddingToCart && (
                           <CircularProgressJ size="sm" color="neutral" />
                         )
                       }
@@ -322,9 +300,11 @@ const ProductDetails = () => {
                       onClick={handleOpenWishlist}
                       variant="contained"
                       text={
-                        !isAddingToWihlist && checkIfProductPresentInWishlist &&
+                        !isAddingToWishlist &&
+                        checkIfProductPresentInWishlist &&
                         !checkIfProductPresentInWishlist.isLoading &&
-                        !checkIfProductPresentInWishlist.isError && checkIfProductPresentInWishlist.data &&
+                        !checkIfProductPresentInWishlist.isError &&
+                        checkIfProductPresentInWishlist.data &&
                         checkIfProductPresentInWishlist.data.addedToWishList
                           ? "added to wishlist"
                           : "add to wishlist"
@@ -333,7 +313,7 @@ const ProductDetails = () => {
                       height="40px"
                       color={"white"}
                       startIcon={
-                        isAddingToWihlist ? (
+                        isAddingToWishlist ? (
                           <CircularProgressJ size="sm" color="neutral" />
                         ) : (
                           <FavoriteBorderIcon />
@@ -353,7 +333,7 @@ const ProductDetails = () => {
                     Description
                   </Typography>
                   <Typography mt={1} variant="body1">
-                    {data.product.itemDescription}
+                    {product.itemDescription}
                   </Typography>
                 </Grid>
                 <Grid padding={1} item>
@@ -374,7 +354,9 @@ const ProductDetails = () => {
                 itemName={data.product.itemName}
                 color={selectedColor}
                 size={selectedSize}
-                price={hasDiscount ? discountedPrice : data.product.itemPrice}
+                price={
+                  hasDiscount ? formattedDiscountPrice : formattedItemPrice
+                }
                 heading={heading}
                 buttonText={buttonText}
                 open={openMiniDialog}
@@ -382,9 +364,9 @@ const ProductDetails = () => {
               />
             </Grid>
             <Grid mt={5} item>
-              {!isLoading && !isError && (
+              {!getProductLoading && !getProductError && (
                 <ProductCarousel
-                  isLoading={isLoading}
+                  isLoading={getProductLoading}
                   heading="YOU MAY ALSO LIKE"
                   products={data.relatedProducts}
                 />

@@ -68,12 +68,14 @@ const WishListItem = ({
         <Typography mb={2} sx={{ color: "rgb(108 108 108)" }} level="body-lg">
           {color}
         </Typography>
-        <Typography level="body-md" mb={1} sx={{ color: "rgb(108 108 108)" }}>
-          SIZE:
-          <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>
-            {size}
+        {size !== "" && (
+          <Typography level="body-md" mb={1} sx={{ color: "rgb(108 108 108)" }}>
+            SIZE:
+            <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>
+              {size}
+            </Typography>
           </Typography>
-        </Typography>
+        )}
         <Typography mb={1} level="body-md" sx={{ color: "rgb(108 108 108)" }}>
           PRICE:
           <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>

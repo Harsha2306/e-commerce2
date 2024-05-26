@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 import { Grid } from "@mui/material";
 import { Typography } from "@mui/joy";
@@ -13,7 +14,7 @@ const grid12 = { width: "100%", height: "70px" };
 const imgStyles = { width: "100%", height: "100%" };
 
 const Product = ({
-  itemName = "test",
+  itemName,
   itemAvailableImages,
   itemDiscount,
   itemPrice,

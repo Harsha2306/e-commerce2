@@ -74,7 +74,7 @@ const MiniDialog = ({
                 SIZE: <Typography level="body-sm">{size}</Typography>
               </Typography>
               <Typography mb={1} level="body-md" sx={{ color: "black" }}>
-                PRICE: <Typography level="body-sm">₹{price}</Typography>
+                PRICE: <Typography level="body-sm">{price}</Typography>
               </Typography>
             </Grid>
           </Grid>

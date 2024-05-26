@@ -1,13 +1,11 @@
 /* eslint-disable react/prop-types */
-import  { useContext } from "react";
+import { useContext } from "react";
 import { Grid, Typography } from "@mui/material";
 import { SizeContext } from "./ProductDetails";
 
 const Size = ({ productSize }) => {
   const { selectedSize, setSelectedSize } = useContext(SizeContext);
-  const onSizeClick = () => {
-    setSelectedSize(productSize);
-  };
+  const onSizeClick = () => setSelectedSize(productSize);
 
   return (
     <>

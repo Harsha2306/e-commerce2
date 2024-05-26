@@ -19,7 +19,7 @@ const CartPage = () => {
   const location = useLocation();
   const [show, setShow] = useState(false);
   const navigateTo = useNavigate();
-
+  
   useEffect(() => {
     if (isError) {
       if (error.data.message === "jwt expired") {

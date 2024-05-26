@@ -3,9 +3,58 @@ const { validationResult } = require("express-validator");
 const { handleError } = require("../util/handleError");
 const Product = require("../models/product");
 
-exports.getProducts = async (req, res, next) => {
+const mongoose = require("mongoose");
+const product = require("../models/product");
+
+// TODO add isAdmin Check
+exports.getALLProducts = async (req, res, next) => {
   try {
-  } catch (error) {}
+    const products = await Product.find();
+    if (!products)
+      throw handleError({
+        message: "No products found",
+        statusCode: 404,
+        ok: false,
+      });
+    res.status(200).json({
+      ok: true,
+      products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getProductById = async (req, res, next) => {
+  try {
+    let { productId } = req.params;
+    if (productId == null) {
+      throw handleError({
+        message: "No productId",
+        statusCode: 404,
+        ok: false,
+      });
+    }
+    productId = new mongoose.Types.ObjectId(productId);
+    const product = await Product.findOne({ _id: productId });
+    if (!product) {
+      throw handleError({
+        message: "No product found with id " + productId,
+        statusCode: 404,
+        ok: false,
+      });
+    }
+    const colors = product.itemAvailableColors.join(",");
+    const imgs = product.itemAvailableImages.join("|");
+    res.status(200).json({
+      ok: true,
+      product,
+      colors,
+      imgs,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.postProduct = async (req, res, next) => {
@@ -23,6 +72,7 @@ exports.postProduct = async (req, res, next) => {
       });
     }
     const {
+      productId,
       itemName,
       itemPrice,
       itemDiscount,
@@ -49,25 +99,52 @@ exports.postProduct = async (req, res, next) => {
         ok: false,
       });
     }
-    const product = new Product({
-      itemName,
-      itemPrice,
-      itemDiscount,
-      itemDescription,
-      itemTag,
-      itemCategory,
-      itemGender,
-      itemAvailableSizes,
-      itemAvailableColors: itemColors,
-      itemAvailableImages: itemImages,
-    });
-    const savedProduct = await product.save();
-    if (!savedProduct) {
-      throw handleError({
-        message: "Error occured while saving product",
-        statusCode: 500,
-        ok: false,
+    if (productId) {
+      const productToUpdate = await Product.findById(productId);
+      if (!productToUpdate)
+        throw handleError({
+          message: "product not found",
+          statusCode: 404,
+          ok: false,
+        });
+      productToUpdate.itemName = itemName;
+      productToUpdate.itemDescription = itemDescription;
+      productToUpdate.itemPrice = itemPrice;
+      productToUpdate.itemDiscount = itemDiscount;
+      productToUpdate.itemTag = itemTag;
+      productToUpdate.itemCategory = itemCategory;
+      productToUpdate.itemGender = itemGender;
+      productToUpdate.itemAvailableSizes = itemAvailableSizes;
+      productToUpdate.itemAvailableColors = itemColors;
+      productToUpdate.itemAvailableImages = itemImages;
+      const updatedProduct = await productToUpdate.save();
+      if (!updatedProduct)
+        throw handleError({
+          message: "product update failed",
+          statusCode: 500,
+          ok: false,
+        });
+    } else {
+      const newProduct = new Product({
+        itemName,
+        itemPrice,
+        itemDiscount,
+        itemDescription,
+        itemTag,
+        itemCategory,
+        itemGender,
+        itemAvailableSizes,
+        itemAvailableColors: itemColors,
+        itemAvailableImages: itemImages,
       });
+      const savedProduct = await newProduct.save();
+      if (!savedProduct) {
+        throw handleError({
+          message: "Error occured while saving product",
+          statusCode: 500,
+          ok: false,
+        });
+      }
     }
     res.status(201).json({
       ok: true,

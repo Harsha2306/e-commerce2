@@ -1,6 +1,6 @@
 const express = require("express");
 
-const isAuthorized = require("../util/isAuthorized");
+const { isAuthorized } = require("../util/isAuthorized");
 const userController = require("../controllers/userController");
 const passwordChangeValidator = require("../validators/passwordChangeValidator");
 
@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/products", userController.getProducts);
 router.get("/orders", isAuthorized, userController.getOrders);
-router.get("/product/:productId", userController.getProductById);
+router.get("/product", userController.getProductById);
 router.get(
   "/products/recommendedAndNewArrivals",
   userController.getRecommendedAndNewArrivals
@@ -21,10 +21,13 @@ router.post(
   userController.removeEntireItemFromCart
 );
 router.post("/addToWishlist", isAuthorized, userController.addToWishlist);
-router.post("/removeFromWishlist", isAuthorized, userController.removeFromWishlist);
+router.post(
+  "/removeFromWishlist",
+  isAuthorized,
+  userController.removeFromWishlist
+);
 router.get(
   "/checkIfProductPresentInWishlist",
-  isAuthorized,
   userController.checkIfProductPresentInWishlist
 );
 router.get("/account", isAuthorized, userController.getUserDetails);

@@ -27,7 +27,6 @@ const CartItem = ({
   color,
   quantity,
   img,
-  _id,
   refetch,
   productId,
 }) => {
@@ -91,12 +90,14 @@ const CartItem = ({
         <Typography mb={2} level="body-lg" sx={{ color: "rgb(108 108 108)" }}>
           {color}
         </Typography>
-        <Typography level="body-md" mb={1} sx={{ color: "rgb(108 108 108)" }}>
-          SIZE:
-          <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>
-            {size}
+        {size !== "" && (
+          <Typography level="body-md" mb={1} sx={{ color: "rgb(108 108 108)" }}>
+            SIZE:
+            <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>
+              {size}
+            </Typography>
           </Typography>
-        </Typography>
+        )}
         <Typography mb={1} level="body-md" sx={{ color: "rgb(108 108 108)" }}>
           PRICE:
           <Typography level="body-md" sx={{ color: "rgb(108 108 108)" }}>

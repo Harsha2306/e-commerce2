@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Grid, TextField } from "@mui/material";
 import { Typography } from "@mui/joy";
 import Textarea from "@mui/joy/Textarea";
@@ -9,12 +9,16 @@ import Option from "@mui/joy/Option";
 import { Box, Chip } from "@mui/joy";
 import { v4 as uuidv4 } from "uuid";
 import StyledButton from "../../components/StyledButton";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import Alert from "@mui/joy/Alert";
-import { usePostAddProductMutation } from "../../api/AdminApi";
+import {
+  useGetProductByIdQuery,
+  usePostAddProductMutation,
+} from "../../api/AdminApi";
 
-// TODO make add and edit as one page
-// TODO add sizes to clothes
+const INVALID_PRODUCT_ID =
+  "input must be a 24 character hex string, 12 byte Uint8Array, or an integer";
+
 const validateTextInput = (ip, pattern, setInputError, errMsg) => {
   if (ip.trim().length === 0) {
     setInputError(true);
@@ -79,6 +83,7 @@ const validateImages = (ip, pattern, setInputError, errMsg) => {
 };
 
 const AddProductPage = () => {
+  const [searchParams] = useSearchParams();
   const [
     itemName,
     itemNameError,
@@ -87,6 +92,7 @@ const AddProductPage = () => {
     resetName,
     setItemNameError,
     setItemNameErrorMessage,
+    setItemName,
   ] = useInput(
     /^[a-zA-Z0-9\s',.!&()#-]+$/,
     "Invalid Item name",
@@ -101,6 +107,7 @@ const AddProductPage = () => {
     resetDescription,
     setItemDescriptionError,
     setItemDescriptionErrorMessage,
+    setItemDescription,
   ] = useInput(/.*/, "Invalid Description", validateTextInput);
 
   const [
@@ -111,6 +118,7 @@ const AddProductPage = () => {
     resetPrice,
     setItemPriceError,
     setItemPriceErrorMessage,
+    setItemPrice,
   ] = useInput(/^\d+(\.\d+)?$/, "Invalid Item Price", validatePriceInput);
 
   const [
@@ -121,6 +129,7 @@ const AddProductPage = () => {
     resetDiscount,
     setItemDiscountError,
     setItemDiscountErrorMessage,
+    setItemDiscount,
   ] = useInput(/^\d+(\.\d+)?$/, "Invalid Discount", validateNumericInput);
 
   const [
@@ -131,6 +140,7 @@ const AddProductPage = () => {
     resetAvailableColors,
     setItemAvalableColorsError,
     setItemAvalableColorsErrorMessage,
+    setItemAvailableColors,
   ] = useInput(
     /^[a-zA-Z, -]+$/,
     "Invalid Syntax, please enter colors seperated by comma(,)",
@@ -145,6 +155,7 @@ const AddProductPage = () => {
     resetImages,
     setItemAvailableImagesError,
     setItemAvailableImagesErrorMessage,
+    setItemAvailableImages,
   ] = useInput(
     /^[a-zA-Z, -]+$/,
     "Must Enter (total provided colors) * 6",
@@ -158,7 +169,54 @@ const AddProductPage = () => {
   const [availableSizesC, setAvailableSizesC] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [postAddProduct] = usePostAddProductMutation();
+  const { data, error, isError, isLoading, refetch } = useGetProductByIdQuery(
+    searchParams.get("productId")
+  );
   const navigateTo = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isError && data) {
+        const { product, colors, imgs } = data;
+        if (product && colors && imgs) {
+          console.log(product.itemPrice);
+          setItemName(product.itemName);
+          setItemDescription(product.itemDescription);
+          setItemPrice(product.itemPrice);
+          setItemDiscount(product.itemDiscount);
+          setTag(product.itemTag);
+          setCategory(product.itemCategory);
+          setGender(product.itemGender);
+          setItemAvailableColors(colors);
+          itemCategory === "Shoes"
+            ? setAvailableSizes(product.itemAvailableSizes)
+            : setAvailableSizesC(product.itemAvailableSizes);
+          setItemAvailableImages(imgs);
+        }
+      }
+      if (isError && error.data.message === INVALID_PRODUCT_ID) {
+        navigateTo("/admin");
+      }
+    }
+  }, [
+    isLoading,
+    isError,
+    error,
+    data,
+    setItemName,
+    setItemDescription,
+    setItemPrice,
+    setItemDiscount,
+    navigateTo,
+    setItemAvailableColors,
+    itemCategory,
+    setItemAvailableImages,
+  ]);
+
+  useEffect(() => {
+    refetch();
+  }, [location.pathname, refetch]);
 
   const resetForm = () => {
     resetName();
@@ -213,10 +271,10 @@ const AddProductPage = () => {
     !itemAvailableColorsError &&
     !itemImagesError &&
     itemName.trim().length !== 0 &&
-    itemDiscount.trim().length !== 0 &&
+    String(itemDiscount).trim().length !== 0 &&
     itemDescription.trim().length !== 0 &&
     itemAvailableColors.trim().length !== 0 &&
-    itemPrice.trim().length !== 0 &&
+    String(itemPrice).trim().length !== 0 &&
     itemAvailableImages.trim().length !== 0
   );
 
@@ -226,8 +284,9 @@ const AddProductPage = () => {
       top: 0,
       behavior: "smooth",
     });
-    console.log(itemAvailableSizes);
+    console.log(itemPrice);
     const res = await postAddProduct({
+      productId: searchParams.get("productId"),
       itemName,
       itemPrice,
       itemDiscount,
@@ -281,12 +340,12 @@ const AddProductPage = () => {
       {showAlert && (
         <Grid item mt="80px" xs={12}>
           <Alert sx={{ borderRadius: "0px" }} variant="solid" color="primary">
-            Adding Item To Database
+            Adding/Updating Item To Database
           </Alert>
         </Grid>
       )}
       <Grid
-        mt={showAlert ? "0px" : "80px"}
+        mt={showAlert ? "0px" : "90px"}
         padding={1}
         item
         xs={12}
@@ -294,7 +353,7 @@ const AddProductPage = () => {
         justifyContent="center"
       >
         <Typography level="body-lg" sx={{ fontSize: "25px" }}>
-          ADD NEW PRODUCT
+          {searchParams.get("productId") ? "UPDATE PRODUCT" : "ADD NEW PRODUCT"}
         </Typography>
       </Grid>
       <Grid container mx={30} mb={3} item xs={12}>
@@ -637,7 +696,9 @@ const AddProductPage = () => {
       <Grid container mx={30} mb={3} item xs={12}>
         <StyledButton
           onClick={onButtonClick}
-          text="ADD NEW PRODUCT"
+          text={
+            searchParams.get("productId") ? "UPDATE PRODUCT" : "ADD NEW PRODUCT"
+          }
           height="40px"
           color={isButtonDisabled ? "rgb(59 64 71)" : "white"}
           backgroundColor={isButtonDisabled ? "rgb(189 193 197)" : "black"}

@@ -11,6 +11,7 @@ import AccountList from "./AccountList";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Search from "./Search";
+import IconButton from "@mui/material/IconButton";
 import Footer from "../components/Footer";
 
 const Navbar = () => {
@@ -51,17 +52,42 @@ const Navbar = () => {
             <Search />
           </NavIconItem>
           <NavIconItem>
-            <Badge badgeContent={wishlistCount} size="sm" invisible={false} color="danger">
-              <FavoriteIcon onClick={() => navigateTo("/wishlist")} />
-            </Badge>
+            <IconButton
+              onClick={() => navigateTo("/wishlist")}
+              sx={{ padding: 0, color: "white" }}
+            >
+              <Badge
+                badgeContent={wishlistCount}
+                size="sm"
+                invisible={false}
+                color="danger"
+              >
+                <FavoriteIcon />
+              </Badge>
+            </IconButton>
           </NavIconItem>
           <NavIconItem>
-            <Badge badgeContent={cartCount} size="sm" invisible={false} color="danger">
-              <ShoppingCartIcon onClick={cartClickHandler} />
-            </Badge>
+            <IconButton
+              onClick={cartClickHandler}
+              sx={{ padding: 0, color: "white" }}
+            >
+              <Badge
+                badgeContent={cartCount}
+                size="sm"
+                invisible={false}
+                color="danger"
+              >
+                <ShoppingCartIcon />
+              </Badge>
+            </IconButton>
           </NavIconItem>
-          <NavIconItem onClick={profileClickHandler}>
-            <PersonIcon />
+          <NavIconItem>
+            <IconButton
+              onClick={profileClickHandler}
+              sx={{ padding: 0, color: "white" }}
+            >
+              <PersonIcon />
+            </IconButton>
           </NavIconItem>
         </Grid>
       </Grid>

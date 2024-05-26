@@ -5,7 +5,7 @@ const adminValidator = require("../validators/adminValidator");
 
 const router = express.Router();
 
-router.get("/", adminController.getProducts);
+router.get("/", adminController.getALLProducts);
 router.post(
   "/add-product",
   [
@@ -16,4 +16,5 @@ router.post(
   ],
   adminController.postProduct
 );
+router.get("/product/:productId", adminController.getProductById);
 module.exports = router;

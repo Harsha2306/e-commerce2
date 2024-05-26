@@ -17,7 +17,6 @@ const AdminNavBar = () => {
       <Grid item xs={12} display="flex">
         <List sx={{ display: "flex", flexDirection: "row", p: 0 }}>
           <NavItem navItemText={"Products"} to="/admin" />
-          <NavItem navItemText={"Add Product"} to="/admin/add-product" />
         </List>
       </Grid>
       <Outlet />

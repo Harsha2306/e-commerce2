@@ -7,8 +7,12 @@ export const adminApi = createApi({
     getProducts: builder.query({
       query: () => "/",
     }),
+    getProductById: builder.query({
+      query: (productId) => `product/${productId}`,
+    }),
     postAddProduct: builder.mutation({
       query: ({
+        productId,
         itemName,
         itemPrice,
         itemDiscount,
@@ -23,6 +27,7 @@ export const adminApi = createApi({
         url: "/add-product",
         method: "post",
         body: {
+          productId,
           itemName,
           itemPrice,
           itemDiscount,
@@ -39,4 +44,4 @@ export const adminApi = createApi({
   }),
 });
 
-export const { usePostAddProductMutation } = adminApi;
+export const { usePostAddProductMutation, useGetProductsQuery, useGetProductByIdQuery } = adminApi;

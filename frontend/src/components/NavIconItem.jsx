@@ -1,10 +1,10 @@
+/* eslint-disable react/prop-types */
 import { Grid } from "@mui/material";
 
-const NavIconItem = ({ children, onClick }) => {
+const NavIconItem = ({ children }) => {
   return (
     <Grid
       item
-      onClick={onClick}
       sx={{
         display: "flex",
         alignItems: "center",

@@ -5,6 +5,7 @@ const Wishlist = require("../models/wishlist");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
+const { isAuthorizedFlag } = require("../util/isAuthorized");
 
 const mongoose = require("mongoose");
 
@@ -146,17 +147,16 @@ exports.getOrders = async (req, res, next) => {
 
 exports.getProductById = async (req, res, next) => {
   try {
-    let { productId } = req.params;
+    let { productId } = req.query;
     productId = new mongoose.Types.ObjectId(productId);
     const product = await Product.findOne({ _id: productId });
-    if (!productId) {
+    if (!product) {
       throw handleError({
         message: "No product found with id " + productId,
         statusCode: 404,
         ok: false,
       });
     }
-    console.log(product);
     const colorsWithImages = [];
     product.itemAvailableColors.map((color, idx) => {
       let colorWithImage = {};
@@ -239,6 +239,7 @@ function generateDistinctRandomNumbers(min, max, count) {
 exports.addToCart = async (req, res, next) => {
   const productId = new mongoose.Types.ObjectId(req.body.productId);
   const { size, color } = req.body;
+  console.log(size)
   const userId = new mongoose.Types.ObjectId(req.userId);
   try {
     let cart = await Cart.findOne({ userId });
@@ -504,24 +505,26 @@ exports.removeFromWishlist = async (req, res, next) => {
 
 exports.checkIfProductPresentInWishlist = async (req, res, next) => {
   const { productId, selectedSize, selectedColor } = req.query;
-  console.log(req.query, req.userId);
   let addedToWishList;
   try {
-    if (req.userId && productId && selectedSize && selectedColor) {
-      const wishList = await Wishlist.findOne({ userId: req.userId });
-      if (!wishList) {
-        throw handleError({
-          message: "No wishlist found",
-          statusCode: 404,
-          ok: false,
-        });
+    if (isAuthorizedFlag(req)) {
+      const userId = new mongoose.Types.ObjectId(req.userId);
+      if (productId && selectedSize && selectedColor) {
+        const wishList = await Wishlist.findOne({ userId });
+        if (!wishList) {
+          throw handleError({
+            message: "No wishlist found",
+            statusCode: 404,
+            ok: false,
+          });
+        }
+        addedToWishList = wishList.items.find(
+          (item) =>
+            item.productId.toString() === productId &&
+            item.size === selectedSize &&
+            item.color === selectedColor
+        );
       }
-      addedToWishList = wishList.items.find(
-        (item) =>
-          item.productId.toString() === productId &&
-          item.size === selectedSize &&
-          item.color === selectedColor
-      );
     }
     res.status(200).json({
       ok: true,

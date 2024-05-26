@@ -16,12 +16,10 @@ import CartPage from "./pages/CartPage";
 import OrdersPage from "./pages/OrdersPage";
 import HomePage from "./pages/admin/HomePage";
 import AddProductPage from "./pages/admin/AddProductPage";
-import EditProductPage from "./pages/admin/EditProductPage";
 
 const router = createBrowserRouter([
   { path: "/admin", element: <HomePage /> },
   { path: "/admin/add-product", element: <AddProductPage /> },
-  { path: "/admin/edit-product/:productId", element: <EditProductPage /> },
   {
     path: "/",
     element: <Navbar />,
