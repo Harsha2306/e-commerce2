@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-import React from "react";
 import { Grid } from "@mui/material";
 import { Typography } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
@@ -55,11 +54,7 @@ const Product = ({
         </Grid>
         <Grid container item sx={grid12}>
           <Grid xs={8.5} display="flex" alignItems="center" item>
-            <Typography
-              level="title-md"
-            >
-              {itemName}
-            </Typography>
+            <Typography level="title-md">{itemName}</Typography>
           </Grid>
           <Grid xs container direction="column" item>
             {hasDiscount && (
@@ -69,7 +64,7 @@ const Product = ({
                 display="flex"
                 justifyContent="center"
                 alignItems={hasDiscount ? "flex-end" : "flex-start"}
-                marginTop={!hasDiscount && "5px"}
+                marginTop={!hasDiscount ? "5px" : "0px"}
               >
                 <Typography
                   level="title-lg"
@@ -91,7 +86,7 @@ const Product = ({
                   textDecoration: hasDiscount && "line-through",
                   fontSize: hasDiscount ? "17px" : "21px",
                   fontWeight: !hasDiscount && "600",
-                  marginTop: !hasDiscount && "9px",
+                  marginTop: !hasDiscount ? "9px" : "0px",
                 }}
               >
                 {itemPrice.toLocaleString()}

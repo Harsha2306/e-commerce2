@@ -21,9 +21,9 @@ export const userApi = createApi({
       query: (queryParams) =>
         `product?${new URLSearchParams(queryParams).toString()}`,
     }),
-    getCheckIfProductPresentInWishlist: builder.query({
+    getCheckIfProductPresentInWishlistAndCart: builder.query({
       query: (queryParams) =>
-        `CheckIfProductPresentInWishlist?${new URLSearchParams(
+        `checkIfProductPresentInWishlistAndCart?${new URLSearchParams(
           queryParams
         ).toString()}`,
     }),
@@ -95,7 +95,6 @@ export const {
   useGetRecommendedAndNewArrivalsQuery,
   useAddToCartMutation,
   useAddToWishlistMutation,
-  useGetCheckIfProductPresentInWishlistQuery,
   useGetUserDetailsQuery,
   useChangePasswordMutation,
   useGetSearchedProductsQuery,
@@ -104,4 +103,5 @@ export const {
   useRemoveFromCartMutation,
   useRemoveEntireItemFromCartMutation,
   useRemoveFromWishlistMutation,
+  useGetCheckIfProductPresentInWishlistAndCartQuery
 } = userApi;

@@ -239,7 +239,7 @@ function generateDistinctRandomNumbers(min, max, count) {
 exports.addToCart = async (req, res, next) => {
   const productId = new mongoose.Types.ObjectId(req.body.productId);
   const { size, color } = req.body;
-  console.log(size)
+  console.log(size);
   const userId = new mongoose.Types.ObjectId(req.userId);
   try {
     let cart = await Cart.findOne({ userId });
@@ -503,9 +503,9 @@ exports.removeFromWishlist = async (req, res, next) => {
   }
 };
 
-exports.checkIfProductPresentInWishlist = async (req, res, next) => {
+exports.checkIfProductPresentInWishlistAndCart = async (req, res, next) => {
   const { productId, selectedSize, selectedColor } = req.query;
-  let addedToWishList;
+  let addedToWishList, addedToCart;
   try {
     if (isAuthorizedFlag(req)) {
       const userId = new mongoose.Types.ObjectId(req.userId);
@@ -524,11 +524,26 @@ exports.checkIfProductPresentInWishlist = async (req, res, next) => {
             item.size === selectedSize &&
             item.color === selectedColor
         );
+        const cart = await Cart.findOne({ userId });
+        if (!cart) {
+          throw handleError({
+            message: "No cart found",
+            statusCode: 404,
+            ok: false,
+          });
+        }
+        addedToCart = cart.items.find(
+          (item) =>
+            item.productId.toString() === productId &&
+            item.size === selectedSize &&
+            item.color === selectedColor
+        );
       }
     }
     res.status(200).json({
       ok: true,
       addedToWishList: addedToWishList !== undefined,
+      addedToCart: addedToCart !== undefined,
     });
   } catch (error) {
     next(error);

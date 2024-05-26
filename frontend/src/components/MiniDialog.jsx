@@ -1,4 +1,4 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -18,12 +18,10 @@ const MiniDialog = ({
   color,
   size,
   price,
+  goTo,
 }) => {
   const navigateTo = useNavigate();
-  const onButtonClick = () => {
-    if (heading === "Added to Cart") navigateTo("/cart");
-    else navigateTo("/wishlist");
-  };
+  const onButtonClick = () => navigateTo(goTo);
   const idx = imgSrc && imgSrc.findIndex((img) => img.color === color);
 
   return (

@@ -27,8 +27,8 @@ router.post(
   userController.removeFromWishlist
 );
 router.get(
-  "/checkIfProductPresentInWishlist",
-  userController.checkIfProductPresentInWishlist
+  "/checkIfProductPresentInWishlistAndCart",
+  userController.checkIfProductPresentInWishlistAndCart
 );
 router.get("/account", isAuthorized, userController.getUserDetails);
 router.post(

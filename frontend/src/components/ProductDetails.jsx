@@ -14,7 +14,7 @@ import {
   useAddToCartMutation,
   useGetProductByIdQuery,
   useAddToWishlistMutation,
-  useGetCheckIfProductPresentInWishlistQuery,
+  useGetCheckIfProductPresentInWishlistAndCartQuery,
 } from "../api/UserApi";
 import { useNavigate } from "react-router-dom";
 import CircularProgressJ from "@mui/joy/CircularProgress";
@@ -24,7 +24,7 @@ import { setCartCount } from "../redux-store/userSlice";
 import { useDispatch } from "react-redux";
 import useGetPrice from "../hooks/useGetPrice";
 import useFormattedPrice from "../hooks/useFormattedPrice";
-import {setWishlistCount} from '../redux-store/userSlice'
+import { setWishlistCount } from "../redux-store/userSlice";
 
 export const SizeContext = createContext();
 export const ColorContext = createContext();
@@ -56,6 +56,7 @@ const ProductDetails = () => {
   const [openMiniDialog, setOpenMiniDialog] = useState(false);
   const [heading, setHeading] = useState("");
   const [buttonText, setButtonText] = useState("");
+  const [goTo, setGoTo] = useState("");
 
   const {
     data,
@@ -66,8 +67,8 @@ const ProductDetails = () => {
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [addToWishlist, { isLoading: isAddingToWishlist }] =
     useAddToWishlistMutation();
-  const checkIfProductPresentInWishlist =
-    useGetCheckIfProductPresentInWishlistQuery({
+  const checkIfProductPresentInWishlistAndCart =
+    useGetCheckIfProductPresentInWishlistAndCartQuery({
       productId,
       selectedSize,
       selectedColor,
@@ -96,7 +97,6 @@ const ProductDetails = () => {
     product.itemDiscount
   );
   const formattedItemPrice = useFormattedPrice(product.itemPrice);
-  console.log(selectedSize, selectedColor, imgIndex);
 
   const handleClose = () => setOpenMiniDialog(false);
   const handleOpenCart = async () => {
@@ -115,10 +115,23 @@ const ProductDetails = () => {
         }, 3000);
       }
     } else {
-      setHeading("Added to Cart");
-      setButtonText("view cart & checkout");
-      setOpenMiniDialog(true);
-      dispatch(setCartCount(res.data.cartLength));
+      if (
+        checkIfProductPresentInWishlistAndCart &&
+        !checkIfProductPresentInWishlistAndCart.isLoading &&
+        !checkIfProductPresentInWishlistAndCart.isError &&
+        checkIfProductPresentInWishlistAndCart.data.addedToCart
+      ) {
+        setHeading("Quantity Increased");
+        setButtonText("view cart & checkout");
+        setOpenMiniDialog(true);
+      } else {
+        setHeading("Added to Cart");
+        setButtonText("view cart & checkout");
+        setOpenMiniDialog(true);
+        dispatch(setCartCount(res.data.cartLength));
+      }
+      checkIfProductPresentInWishlistAndCart.refetch();
+      setGoTo("/cart");
     }
   };
 
@@ -139,7 +152,8 @@ const ProductDetails = () => {
       setButtonText("view wishlist");
       setOpenMiniDialog(true);
       dispatch(setWishlistCount(res.data.wishlistLength));
-      checkIfProductPresentInWishlist.refetch();
+      checkIfProductPresentInWishlistAndCart.refetch();
+      setGoTo("/wishlist");
     }
   };
 
@@ -280,7 +294,16 @@ const ProductDetails = () => {
                     <StyledButton
                       margin="0px 0px 15px 0px"
                       variant="contained"
-                      text={!isAddingToCart && "add to cart"}
+                      text={
+                        !isAddingToCart &&
+                        checkIfProductPresentInWishlistAndCart &&
+                        !checkIfProductPresentInWishlistAndCart.isLoading &&
+                        !checkIfProductPresentInWishlistAndCart.isError &&
+                        checkIfProductPresentInWishlistAndCart.data &&
+                        checkIfProductPresentInWishlistAndCart.data.addedToCart
+                          ? "added to Cart"
+                          : "add to Cart"
+                      }
                       width="100%"
                       height="40px"
                       color="white"
@@ -301,11 +324,12 @@ const ProductDetails = () => {
                       variant="contained"
                       text={
                         !isAddingToWishlist &&
-                        checkIfProductPresentInWishlist &&
-                        !checkIfProductPresentInWishlist.isLoading &&
-                        !checkIfProductPresentInWishlist.isError &&
-                        checkIfProductPresentInWishlist.data &&
-                        checkIfProductPresentInWishlist.data.addedToWishList
+                        checkIfProductPresentInWishlistAndCart &&
+                        !checkIfProductPresentInWishlistAndCart.isLoading &&
+                        !checkIfProductPresentInWishlistAndCart.isError &&
+                        checkIfProductPresentInWishlistAndCart.data &&
+                        checkIfProductPresentInWishlistAndCart.data
+                          .addedToWishList
                           ? "added to wishlist"
                           : "add to wishlist"
                       }
@@ -350,6 +374,7 @@ const ProductDetails = () => {
             </Grid>
             <Grid item>
               <MiniDialog
+                goTo={goTo}
                 imgSrc={data.colorsWithImages}
                 itemName={data.product.itemName}
                 color={selectedColor}
