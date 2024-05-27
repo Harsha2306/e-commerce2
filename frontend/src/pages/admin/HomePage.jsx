@@ -1,10 +1,12 @@
-import { Grid, Button } from "@mui/material";
-import { Typography } from "@mui/joy";
+import { Grid } from "@mui/material";
 import AdminNavBar from "../../components/admin/AdminNavBar";
 import { useGetProductsQuery } from "../../api/AdminApi";
 import { useNavigate, useLocation } from "react-router-dom";
 import StyledButton from "../../components/StyledButton";
 import { useState, useEffect } from "react";
+import AdminProduct from "../../components/admin/AdminProduct";
+import Product from "../../components/Product";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const HomePage = () => {
   const { data, isLoading, isError, error, refetch } = useGetProductsQuery();
@@ -27,31 +29,49 @@ const HomePage = () => {
   return (
     <>
       <AdminNavBar />
-      <Grid container mt="100px">
-        <Grid item display="flex" mr={5} justifyContent="flex-end" xs={12}>
-          <StyledButton
-            text="ADD NEW PRODUCT"
-            color="white"
-            backgroundColor="black"
-            hoverStyles={{ color: "white", backgroundColor: "black" }}
-            onClick={() => navigateTo("/admin/add-product?edit=false")}
-          />
+      {isLoading && (
+        <Grid
+          height="600px"
+          container
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <CircularProgress color="inherit" />
         </Grid>
-        {products.map((product) => (
-          <Grid item key={product._id} xs={12}>
-            <Typography>{product.itemName}</Typography>
-            <Button
-              onClick={() => {
-                navigateTo(
-                  `/admin/add-product?edit=true&productId=${product._id}`
-                );
-              }}
-            >
-              Edit
-            </Button>
+      )}
+      {!isLoading && (
+        <Grid container mt="100px">
+          <Grid item display="flex" mr={5} justifyContent="flex-end" xs={12}>
+            <StyledButton
+              text="ADD NEW PRODUCT"
+              color="white"
+              backgroundColor="black"
+              hoverStyles={{ color: "white", backgroundColor: "black" }}
+              onClick={() => navigateTo("/admin/add-product?edit=false")}
+            />
           </Grid>
-        ))}
-      </Grid>
+          <Grid container>
+            {products.map((product) => (
+              <AdminProduct
+                key={product._id}
+                _id={product._id}
+                itemName={product.itemName}
+              >
+                <Product
+                  itemName={product.itemName}
+                  itemPrice={product.itemPrice}
+                  itemDiscount={product.itemDiscount}
+                  itemAvailableImages={product.itemAvailableImages}
+                  _id={product._id}
+                  itemTag={product.itemTag}
+                  isAdmin={true}
+                />
+              </AdminProduct>
+            ))}
+          </Grid>
+        </Grid>
+      )}
     </>
   );
 };

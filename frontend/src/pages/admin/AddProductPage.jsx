@@ -15,6 +15,7 @@ import {
   useGetProductByIdQuery,
   usePostAddProductMutation,
 } from "../../api/AdminApi";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const INVALID_PRODUCT_ID =
   "input must be a 24 character hex string, 12 byte Uint8Array, or an integer";
@@ -180,7 +181,6 @@ const AddProductPage = () => {
       if (!isError && data) {
         const { product, colors, imgs } = data;
         if (product && colors && imgs) {
-          console.log(product.itemPrice);
           setItemName(product.itemName);
           setItemDescription(product.itemDescription);
           setItemPrice(product.itemPrice);
@@ -284,7 +284,6 @@ const AddProductPage = () => {
       top: 0,
       behavior: "smooth",
     });
-    console.log(itemPrice);
     const res = await postAddProduct({
       productId: searchParams.get("productId"),
       itemName,
@@ -337,6 +336,17 @@ const AddProductPage = () => {
   return (
     <Grid container>
       <AdminNavBar />
+      {isLoading && (
+        <Grid
+          height="600px"
+          container
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <CircularProgress color="inherit" />
+        </Grid>
+      )}
       {showAlert && (
         <Grid item mt="80px" xs={12}>
           <Alert sx={{ borderRadius: "0px" }} variant="solid" color="primary">

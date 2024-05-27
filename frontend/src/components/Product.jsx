@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const grid1 = {
   width: "272px",
   height: "362px",
-  "&:hover": { cursor: "pointer" },
+  "&:hover": { cursor:"pointer" },
 };
 const grid11 = { width: "100%", height: "262px" };
 const grid12 = { width: "100%", height: "70px" };
@@ -19,6 +19,7 @@ const Product = ({
   itemPrice,
   itemTag,
   _id,
+  isAdmin,
 }) => {
   const navigateTo = useNavigate();
   const hasDiscount = itemDiscount === 0 ? false : true;
@@ -43,7 +44,7 @@ const Product = ({
     <>
       <Grid
         onClick={() => {
-          navigateTo(`/products/${_id}`);
+          if (!isAdmin) navigateTo(`/products/${_id}`);
         }}
         container
         sx={grid1}
