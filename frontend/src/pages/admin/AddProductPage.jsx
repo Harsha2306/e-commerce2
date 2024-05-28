@@ -162,7 +162,7 @@ const AddProductPage = () => {
     "Must Enter (total provided colors) * 6",
     validateImages
   );
-
+  const productId = searchParams.get("productId");
   const [itemTag, setTag] = useState("");
   const [itemAvailableSizes, setAvailableSizes] = useState([]);
   const [itemCategory, setCategory] = useState("Shoes");
@@ -170,9 +170,8 @@ const AddProductPage = () => {
   const [availableSizesC, setAvailableSizesC] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [postAddProduct] = usePostAddProductMutation();
-  const { data, error, isError, isLoading, refetch } = useGetProductByIdQuery(
-    searchParams.get("productId")
-  );
+  const { data, error, isError, isLoading, refetch } =
+    useGetProductByIdQuery(productId);
   const navigateTo = useNavigate();
   const location = useLocation();
 
@@ -285,7 +284,7 @@ const AddProductPage = () => {
       behavior: "smooth",
     });
     const res = await postAddProduct({
-      productId: searchParams.get("productId"),
+      productId: productId,
       itemName,
       itemPrice,
       itemDiscount,
@@ -333,10 +332,10 @@ const AddProductPage = () => {
     setShowAlert(false);
   };
 
-  return (
-    <Grid container>
-      <AdminNavBar />
-      {isLoading && (
+  if (isLoading)
+    return (
+      <>
+        <AdminNavBar />
         <Grid
           height="600px"
           container
@@ -346,380 +345,385 @@ const AddProductPage = () => {
         >
           <CircularProgress color="inherit" />
         </Grid>
-      )}
-      {showAlert && (
-        <Grid item mt="80px" xs={12}>
-          <Alert sx={{ borderRadius: "0px" }} variant="solid" color="primary">
-            Adding/Updating Item To Database
-          </Alert>
-        </Grid>
-      )}
-      <Grid
-        mt={showAlert ? "0px" : "90px"}
-        padding={1}
-        item
-        xs={12}
-        display="flex"
-        justifyContent="center"
-      >
-        <Typography level="body-lg" sx={{ fontSize: "25px" }}>
-          {searchParams.get("productId") ? "UPDATE PRODUCT" : "ADD NEW PRODUCT"}
-        </Typography>
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM NAME <Typography color="danger">*</Typography>
-          </Typography>
-        </Grid>
-        <Grid xs={12} item>
-          <TextField
-            value={itemName}
-            onChange={itemNameChangeHandler}
-            placeholder="Enter Item name here"
-            variant="outlined"
-            fullWidth
-            sx={{
-              borderRadius: "50px",
-              borderColor: itemNameError ? "rgb(182 41 6)" : "black",
-              "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                {
-                  borderColor: itemNameError ? "rgb(182 41 6)" : "black",
-                },
-            }}
-          />
-        </Grid>
-        {itemNameError && (
-          <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-            {itemNameErrorMessage}
-          </Typography>
+      </>
+    );
+
+  return (
+    <Grid container>
+      <AdminNavBar />
+      <>
+        {showAlert && (
+          <Grid item mt="80px" xs={12}>
+            <Alert sx={{ borderRadius: "0px" }} variant="solid" color="primary">
+              Adding/Updating Item To Database
+            </Alert>
+          </Grid>
         )}
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM PRICE <Typography color="danger">*</Typography>
+        <Grid
+          mt={showAlert ? "0px" : "90px"}
+          padding={1}
+          item
+          xs={12}
+          display="flex"
+          justifyContent="center"
+        >
+          <Typography level="body-lg" sx={{ fontSize: "25px" }}>
+            {productId ? "UPDATE PRODUCT" : "ADD NEW PRODUCT"}
           </Typography>
         </Grid>
-        <Grid xs={12} item>
-          <TextField
-            value={itemPrice}
-            onChange={itemPriceChangeHandler}
-            placeholder="Enter Item price here"
-            variant="outlined"
-            fullWidth
-            sx={{
-              borderRadius: "50px",
-              borderColor: itemPriceError ? "rgb(182 41 6)" : "black",
-              "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                {
-                  borderColor: itemPriceError ? "rgb(182 41 6)" : "black",
-                },
-            }}
-          />
-        </Grid>
-        {itemPriceError && (
-          <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-            {itemPriceErrorMessage}
-          </Typography>
-        )}
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM DISCOUNT <Typography color="danger">*</Typography>
-          </Typography>
-        </Grid>
-        <Grid xs={12} item>
-          <TextField
-            value={itemDiscount}
-            onChange={itemDiscountChangeHandler}
-            placeholder="Enter Item discount here"
-            variant="outlined"
-            fullWidth
-            sx={{
-              borderRadius: "50px",
-              borderColor: itemDiscountError ? "rgb(182 41 6)" : "black",
-              "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-                {
-                  borderColor: itemDiscountError ? "rgb(182 41 6)" : "black",
-                },
-            }}
-          />
-        </Grid>
-        {itemDiscountError && (
-          <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-            {itemDiscountErrorMessage}
-          </Typography>
-        )}
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM DESCRIPTION <Typography color="danger">*</Typography>
-          </Typography>
-        </Grid>
-        <Grid xs={12} item>
-          <Textarea
-            value={itemDescription}
-            onChange={itemDescriptionChangeHandler}
-            placeholder="Enter Item description here"
-            variant="outlined"
-            minRows={5}
-            maxRows={5}
-            sx={{
-              "--Textarea-focusedHighlight": itemDescriptionError
-                ? "rgb(182 41 6)"
-                : "black",
-            }}
-          />
-        </Grid>
-        {itemDescriptionError && (
-          <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-            {itemDescriptionErrorMessage}
-          </Typography>
-        )}
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM TAG
-          </Typography>
-        </Grid>
-        <Grid xs={12} height="50px" item>
-          <Select
-            sx={{ height: "100%" }}
-            value={itemTag}
-            onChange={tagChangeHandler}
-          >
-            <Option value=""></Option>
-            <Option value="Exclusive">Exclusive</Option>
-            <Option value="Recycled">Recycled</Option>
-            <Option value="Limited Edition">Limited Edition</Option>
-          </Select>
-        </Grid>
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM CATEGORY <Typography color="danger">*</Typography>
-          </Typography>
-        </Grid>
-        <Grid xs={12} height="50px" item>
-          <Select
-            sx={{ height: "100%" }}
-            value={itemCategory}
-            onChange={categoryChangeHandler}
-          >
-            <Option value="Shoes">Shoes</Option>
-            <Option value="Clothes">Clothes</Option>
-            <Option value="Accessories">Accessories</Option>
-          </Select>
-        </Grid>
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM GENDER <Typography color="danger">*</Typography>
-          </Typography>
-        </Grid>
-        <Grid xs={12} height="50px" item>
-          <Select
-            sx={{ height: "100%" }}
-            value={itemGender}
-            onChange={genderChangeHandler}
-          >
-            <Option value="Men">Men</Option>
-            <Option value="Women">Women</Option>
-            <Option value="Kids">Kids</Option>
-          </Select>
-        </Grid>
-      </Grid>
-      {itemCategory !== "Accessories" && (
         <Grid container mx={30} mb={3} item xs={12}>
           <Grid xs={12} item>
             <Typography paddingY={0.5} level="title-sm">
-              ITEM AVAILABE SIZES <Typography color="danger">*</Typography>
+              ITEM NAME <Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid xs={12} item>
+            <TextField
+              value={itemName}
+              onChange={itemNameChangeHandler}
+              placeholder="Enter Item name here"
+              variant="outlined"
+              fullWidth
+              sx={{
+                borderRadius: "50px",
+                borderColor: itemNameError ? "rgb(182 41 6)" : "black",
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    borderColor: itemNameError ? "rgb(182 41 6)" : "black",
+                  },
+              }}
+            />
+          </Grid>
+          {itemNameError && (
+            <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
+              {itemNameErrorMessage}
+            </Typography>
+          )}
+        </Grid>
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              ITEM PRICE <Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid xs={12} item>
+            <TextField
+              value={itemPrice}
+              onChange={itemPriceChangeHandler}
+              placeholder="Enter Item price here"
+              variant="outlined"
+              fullWidth
+              sx={{
+                borderRadius: "50px",
+                borderColor: itemPriceError ? "rgb(182 41 6)" : "black",
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    borderColor: itemPriceError ? "rgb(182 41 6)" : "black",
+                  },
+              }}
+            />
+          </Grid>
+          {itemPriceError && (
+            <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
+              {itemPriceErrorMessage}
+            </Typography>
+          )}
+        </Grid>
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              ITEM DISCOUNT <Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid xs={12} item>
+            <TextField
+              value={itemDiscount}
+              onChange={itemDiscountChangeHandler}
+              placeholder="Enter Item discount here"
+              variant="outlined"
+              fullWidth
+              sx={{
+                borderRadius: "50px",
+                borderColor: itemDiscountError ? "rgb(182 41 6)" : "black",
+                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+                  {
+                    borderColor: itemDiscountError ? "rgb(182 41 6)" : "black",
+                  },
+              }}
+            />
+          </Grid>
+          {itemDiscountError && (
+            <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
+              {itemDiscountErrorMessage}
+            </Typography>
+          )}
+        </Grid>
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              ITEM DESCRIPTION <Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid xs={12} item>
+            <Textarea
+              value={itemDescription}
+              onChange={itemDescriptionChangeHandler}
+              placeholder="Enter Item description here"
+              variant="outlined"
+              minRows={5}
+              maxRows={5}
+              sx={{
+                "--Textarea-focusedHighlight": itemDescriptionError
+                  ? "rgb(182 41 6)"
+                  : "black",
+              }}
+            />
+          </Grid>
+          {itemDescriptionError && (
+            <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
+              {itemDescriptionErrorMessage}
+            </Typography>
+          )}
+        </Grid>
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              ITEM TAG
             </Typography>
           </Grid>
           <Grid xs={12} height="50px" item>
-            {itemCategory === "Shoes" && (
-              <Select
-                required={true}
-                value={itemAvailableSizes}
-                multiple
-                onChange={availabeSizesChangeHandler}
-                renderValue={(selected) => (
-                  <Box sx={{ display: "flex", gap: "0.25rem" }}>
-                    {selected.map((selectedOption) => (
-                      <Chip key={uuidv4()} variant="soft" color="primary">
-                        {selectedOption.label}
-                      </Chip>
-                    ))}
-                  </Box>
-                )}
-                sx={{
-                  minWidth: "15rem",
-                  height: "100%",
-                }}
-                slotProps={{
-                  listbox: {
-                    sx: {
-                      width: "100%",
-                    },
-                  },
-                }}
-              >
-                <Option key="UK 3" value="UK 3">
-                  UK 3
-                </Option>
-                <Option key="UK 4" value="UK 4">
-                  UK 4
-                </Option>
-                <Option key="UK 5" value="UK 5">
-                  UK 5
-                </Option>
-                <Option key="UK 6" value="UK 6">
-                  UK 6
-                </Option>
-                <Option key="UK 7" value="UK 7">
-                  UK 7
-                </Option>
-                <Option key="UK 8" value="UK 8">
-                  UK 8
-                </Option>
-                <Option key="UK 9" value="UK 9">
-                  UK 9
-                </Option>
-                <Option key="UK 10" value="UK 10">
-                  UK 10
-                </Option>
-                <Option key="UK 11" value="UK 11">
-                  UK 11
-                </Option>
-                <Option key="UK 12" value="UK 12">
-                  UK 12
-                </Option>
-              </Select>
-            )}
-            {itemCategory === "Clothes" && (
-              <Select
-                required={true}
-                value={availableSizesC}
-                multiple
-                onChange={availabeSizesCChangeHandler}
-                renderValue={(selected) => (
-                  <Box sx={{ display: "flex", gap: "0.25rem" }}>
-                    {selected.map((selectedOption) => (
-                      <Chip key={uuidv4()} variant="soft" color="primary">
-                        {selectedOption.label}
-                      </Chip>
-                    ))}
-                  </Box>
-                )}
-                sx={{
-                  minWidth: "15rem",
-                  height: "100%",
-                }}
-                slotProps={{
-                  listbox: {
-                    sx: {
-                      width: "100%",
-                    },
-                  },
-                }}
-              >
-                <Option key="XS" value="XS">
-                  XS
-                </Option>
-                <Option key="S" value="S">
-                  S
-                </Option>
-                <Option key="M" value="M">
-                  M
-                </Option>
-                <Option key="L" value="L">
-                  L
-                </Option>
-                <Option key="XL" value="XL">
-                  XL
-                </Option>
-              </Select>
-            )}
+            <Select
+              sx={{ height: "100%" }}
+              value={itemTag}
+              onChange={tagChangeHandler}
+            >
+              <Option value=""></Option>
+              <Option value="Exclusive">Exclusive</Option>
+              <Option value="Recycled">Recycled</Option>
+              <Option value="Limited Edition">Limited Edition</Option>
+            </Select>
           </Grid>
         </Grid>
-      )}
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM AVAILABLE COLORS<Typography color="danger">*</Typography>
-          </Typography>
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              ITEM CATEGORY <Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid xs={12} height="50px" item>
+            <Select
+              sx={{ height: "100%" }}
+              value={itemCategory}
+              onChange={categoryChangeHandler}
+            >
+              <Option value="Shoes">Shoes</Option>
+              <Option value="Clothes">Clothes</Option>
+              <Option value="Accessories">Accessories</Option>
+            </Select>
+          </Grid>
         </Grid>
-        <Grid xs={12} item>
-          <Textarea
-            value={itemAvailableColors}
-            onChange={itemAvailableColorsChangeHandler}
-            placeholder="Enter available colors here seperated by comma( , )"
-            variant="outlined"
-            minRows={5}
-            maxRows={5}
-            sx={{
-              "--Textarea-focusedHighlight": itemAvailableColorsError
-                ? "rgb(182 41 6)"
-                : "black",
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              ITEM GENDER <Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid xs={12} height="50px" item>
+            <Select
+              sx={{ height: "100%" }}
+              value={itemGender}
+              onChange={genderChangeHandler}
+            >
+              <Option value="Men">Men</Option>
+              <Option value="Women">Women</Option>
+              <Option value="Kids">Kids</Option>
+            </Select>
+          </Grid>
+        </Grid>
+        {itemCategory !== "Accessories" && (
+          <Grid container mx={30} mb={3} item xs={12}>
+            <Grid xs={12} item>
+              <Typography paddingY={0.5} level="title-sm">
+                ITEM AVAILABE SIZES <Typography color="danger">*</Typography>
+              </Typography>
+            </Grid>
+            <Grid xs={12} height="50px" item>
+              {itemCategory === "Shoes" && (
+                <Select
+                  required={true}
+                  value={itemAvailableSizes}
+                  multiple
+                  onChange={availabeSizesChangeHandler}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", gap: "0.25rem" }}>
+                      {selected.map((selectedOption) => (
+                        <Chip key={uuidv4()} variant="soft" color="primary">
+                          {selectedOption.label}
+                        </Chip>
+                      ))}
+                    </Box>
+                  )}
+                  sx={{
+                    minWidth: "15rem",
+                    height: "100%",
+                  }}
+                  slotProps={{
+                    listbox: {
+                      sx: {
+                        width: "100%",
+                      },
+                    },
+                  }}
+                >
+                  <Option key="UK 3" value="UK 3">
+                    UK 3
+                  </Option>
+                  <Option key="UK 4" value="UK 4">
+                    UK 4
+                  </Option>
+                  <Option key="UK 5" value="UK 5">
+                    UK 5
+                  </Option>
+                  <Option key="UK 6" value="UK 6">
+                    UK 6
+                  </Option>
+                  <Option key="UK 7" value="UK 7">
+                    UK 7
+                  </Option>
+                  <Option key="UK 8" value="UK 8">
+                    UK 8
+                  </Option>
+                  <Option key="UK 9" value="UK 9">
+                    UK 9
+                  </Option>
+                  <Option key="UK 10" value="UK 10">
+                    UK 10
+                  </Option>
+                  <Option key="UK 11" value="UK 11">
+                    UK 11
+                  </Option>
+                  <Option key="UK 12" value="UK 12">
+                    UK 12
+                  </Option>
+                </Select>
+              )}
+              {itemCategory === "Clothes" && (
+                <Select
+                  required={true}
+                  value={availableSizesC}
+                  multiple
+                  onChange={availabeSizesCChangeHandler}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", gap: "0.25rem" }}>
+                      {selected.map((selectedOption) => (
+                        <Chip key={uuidv4()} variant="soft" color="primary">
+                          {selectedOption.label}
+                        </Chip>
+                      ))}
+                    </Box>
+                  )}
+                  sx={{
+                    minWidth: "15rem",
+                    height: "100%",
+                  }}
+                  slotProps={{
+                    listbox: {
+                      sx: {
+                        width: "100%",
+                      },
+                    },
+                  }}
+                >
+                  <Option key="XS" value="XS">
+                    XS
+                  </Option>
+                  <Option key="S" value="S">
+                    S
+                  </Option>
+                  <Option key="M" value="M">
+                    M
+                  </Option>
+                  <Option key="L" value="L">
+                    L
+                  </Option>
+                  <Option key="XL" value="XL">
+                    XL
+                  </Option>
+                </Select>
+              )}
+            </Grid>
+          </Grid>
+        )}
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              ITEM AVAILABLE COLORS<Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid xs={12} item>
+            <Textarea
+              value={itemAvailableColors}
+              onChange={itemAvailableColorsChangeHandler}
+              placeholder="Enter available colors here seperated by comma( , )"
+              variant="outlined"
+              minRows={5}
+              maxRows={5}
+              sx={{
+                "--Textarea-focusedHighlight": itemAvailableColorsError
+                  ? "rgb(182 41 6)"
+                  : "black",
+              }}
+            />
+          </Grid>
+          {itemAvailableColorsError && (
+            <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
+              {itemAvailableColorsErrorMessage}
+            </Typography>
+          )}
+        </Grid>
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              ITEM AVAILABLE IMAGES<Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid xs={12} item>
+            <Textarea
+              value={itemAvailableImages}
+              onChange={itemImagesChangeHandler}
+              placeholder="Enter available images here seperated by ( | )"
+              variant="outlined"
+              minRows={5}
+              maxRows={5}
+              sx={{
+                "--Textarea-focusedHighlight": itemImagesError
+                  ? "rgb(182 41 6)"
+                  : "black",
+              }}
+            />
+          </Grid>
+          {itemImagesError && (
+            <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
+              {itemImagesErrorMessage}
+            </Typography>
+          )}
+        </Grid>
+        <Grid container mx={30} mb={3} item xs={12}>
+          <StyledButton
+            onClick={onButtonClick}
+            text={productId ? "UPDATE PRODUCT" : "ADD NEW PRODUCT"}
+            height="40px"
+            color={isButtonDisabled ? "rgb(59 64 71)" : "white"}
+            backgroundColor={isButtonDisabled ? "rgb(189 193 197)" : "black"}
+            width="100%"
+            hoverStyles={{
+              color: isButtonDisabled ? "rgb(59 64 71)" : "white",
+              backgroundColor: isButtonDisabled ? "rgb(189 193 197)" : "black",
             }}
+            disabled={isButtonDisabled}
           />
         </Grid>
-        {itemAvailableColorsError && (
-          <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-            {itemAvailableColorsErrorMessage}
-          </Typography>
-        )}
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <Grid xs={12} item>
-          <Typography paddingY={0.5} level="title-sm">
-            ITEM AVAILABLE IMAGES<Typography color="danger">*</Typography>
-          </Typography>
-        </Grid>
-        <Grid xs={12} item>
-          <Textarea
-            value={itemAvailableImages}
-            onChange={itemImagesChangeHandler}
-            placeholder="Enter available images here seperated by ( | )"
-            variant="outlined"
-            minRows={5}
-            maxRows={5}
-            sx={{
-              "--Textarea-focusedHighlight": itemImagesError
-                ? "rgb(182 41 6)"
-                : "black",
-            }}
-          />
-        </Grid>
-        {itemImagesError && (
-          <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-            {itemImagesErrorMessage}
-          </Typography>
-        )}
-      </Grid>
-      <Grid container mx={30} mb={3} item xs={12}>
-        <StyledButton
-          onClick={onButtonClick}
-          text={
-            searchParams.get("productId") ? "UPDATE PRODUCT" : "ADD NEW PRODUCT"
-          }
-          height="40px"
-          color={isButtonDisabled ? "rgb(59 64 71)" : "white"}
-          backgroundColor={isButtonDisabled ? "rgb(189 193 197)" : "black"}
-          width="100%"
-          hoverStyles={{
-            color: isButtonDisabled ? "rgb(59 64 71)" : "white",
-            backgroundColor: isButtonDisabled ? "rgb(189 193 197)" : "black",
-          }}
-          disabled={isButtonDisabled}
-        />
-      </Grid>
+      </>
     </Grid>
   );
 };

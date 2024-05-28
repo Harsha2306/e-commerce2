@@ -6,8 +6,7 @@ const cartItemSchema = require("./cartItem");
 const shoppingCartSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    items: [cartItemSchema],
-    totalPrice: { type: Number, required: true, default: 0 },
+    items: [cartItemSchema]
   },
   {
     timestamps: true,

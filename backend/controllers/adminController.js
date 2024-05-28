@@ -28,24 +28,20 @@ exports.getALLProducts = async (req, res, next) => {
 exports.getProductById = async (req, res, next) => {
   try {
     let { productId } = req.params;
-    if (productId == null) {
-      throw handleError({
-        message: "No productId",
-        statusCode: 404,
-        ok: false,
-      });
+    let product, colors, imgs;
+    if (productId !== "null") {
+      productId = new mongoose.Types.ObjectId(productId);
+      product = await Product.findOne({ _id: productId });
+      if (!product) {
+        throw handleError({
+          message: "No product found with id " + productId,
+          statusCode: 404,
+          ok: false,
+        });
+      }
+      colors = product.itemAvailableColors.join(",");
+      imgs = product.itemAvailableImages.join("|");
     }
-    productId = new mongoose.Types.ObjectId(productId);
-    const product = await Product.findOne({ _id: productId });
-    if (!product) {
-      throw handleError({
-        message: "No product found with id " + productId,
-        statusCode: 404,
-        ok: false,
-      });
-    }
-    const colors = product.itemAvailableColors.join(",");
-    const imgs = product.itemAvailableImages.join("|");
     res.status(200).json({
       ok: true,
       product,

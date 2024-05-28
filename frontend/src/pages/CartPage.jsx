@@ -57,7 +57,7 @@ const CartPage = () => {
         </Grid>
       )}
       <Grid mt={10} container paddingX={4}>
-        {!isError && !isLoading && empty && (
+        {!isLoading && empty && (
           <Grid
             item
             display="flex"

@@ -52,7 +52,7 @@ const WishlistPage = () => {
           <SessionExpiredAlert show={show} />
         </Grid>
       )}
-      {!isLoading && !isError && (
+      {!isLoading && (
         <Grid
           item
           mt={15}

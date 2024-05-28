@@ -239,7 +239,6 @@ function generateDistinctRandomNumbers(min, max, count) {
 exports.addToCart = async (req, res, next) => {
   const productId = new mongoose.Types.ObjectId(req.body.productId);
   const { size, color } = req.body;
-  console.log(size);
   const userId = new mongoose.Types.ObjectId(req.userId);
   try {
     let cart = await Cart.findOne({ userId });
@@ -252,12 +251,6 @@ exports.addToCart = async (req, res, next) => {
         ok: false,
       });
     }
-    let itemPrice = product.itemPrice;
-    let itemDiscount = product.itemDiscount;
-    const hasDiscount = product.itemDiscount === 0 ? false : true;
-    if (hasDiscount) {
-      itemPrice = Math.round(itemPrice - itemPrice * (itemDiscount / 100));
-    }
     const itemIndex = cart.items.findIndex(
       (item) =>
         item.productId.toString() === productId.toString() &&
@@ -268,17 +261,13 @@ exports.addToCart = async (req, res, next) => {
       cart.items.unshift({
         productId: productId,
         quantity: 1,
-        price: itemPrice,
-        total: itemPrice,
         size,
         color,
       });
     } else {
       const cartItem = cart.items[itemIndex];
       cartItem.quantity += 1;
-      cartItem.total = cartItem.price * cartItem.quantity;
     }
-    cart.totalPrice += itemPrice;
     const updatedCart = await cart.save();
     if (!updatedCart) {
       throw handleError({
@@ -328,17 +317,11 @@ exports.removeFromCart = async (req, res, next) => {
         ok: false,
       });
     }
-    const unitPrice =
-      cart.items[requiredItemIdx].total / cart.items[requiredItemIdx].quantity;
     if (cart.items[requiredItemIdx].quantity === 1)
       cart.items.splice(requiredItemIdx, 1);
     else {
       cart.items[requiredItemIdx].quantity--;
-      cart.items[requiredItemIdx].total =
-        cart.items[requiredItemIdx].price *
-        cart.items[requiredItemIdx].quantity;
     }
-    cart.totalPrice -= unitPrice;
     const updatedCart = await cart.save();
     if (!updatedCart)
       throw handleError({
@@ -392,7 +375,6 @@ exports.removeEntireItemFromCart = async (req, res, next) => {
         ok: false,
       });
     }
-    cart.totalPrice -= cart.items[requiredItemIdx].total;
     cart.items.splice(requiredItemIdx, 1);
     const updatedCart = await cart.save();
     if (!updatedCart)
@@ -511,33 +493,23 @@ exports.checkIfProductPresentInWishlistAndCart = async (req, res, next) => {
       const userId = new mongoose.Types.ObjectId(req.userId);
       if (productId && selectedSize && selectedColor) {
         const wishList = await Wishlist.findOne({ userId });
-        if (!wishList) {
-          throw handleError({
-            message: "No wishlist found",
-            statusCode: 404,
-            ok: false,
-          });
+        if (wishList) {
+          addedToWishList = wishList.items.find(
+            (item) =>
+              item.productId.toString() === productId &&
+              item.size === selectedSize &&
+              item.color === selectedColor
+          );
         }
-        addedToWishList = wishList.items.find(
-          (item) =>
-            item.productId.toString() === productId &&
-            item.size === selectedSize &&
-            item.color === selectedColor
-        );
         const cart = await Cart.findOne({ userId });
-        if (!cart) {
-          throw handleError({
-            message: "No cart found",
-            statusCode: 404,
-            ok: false,
-          });
+        if (cart) {
+          addedToCart = cart.items.find(
+            (item) =>
+              item.productId.toString() === productId &&
+              item.size === selectedSize &&
+              item.color === selectedColor
+          );
         }
-        addedToCart = cart.items.find(
-          (item) =>
-            item.productId.toString() === productId &&
-            item.size === selectedSize &&
-            item.color === selectedColor
-        );
       }
     }
     res.status(200).json({
@@ -697,20 +669,30 @@ exports.getWishlist = async (req, res, next) => {
         statusCode: 404,
         ok: false,
       });
-    const wishlistProds = wishlist.items.map((product) => {
-      const productInfo = product.productId;
-      const idx = productInfo.itemAvailableColors.findIndex(
-        (color) => color === product.color
+    const productIds = wishlist.items.map((item) => item.productId._id);
+    const products = await Product.find({ _id: { $in: productIds } });
+    const wishlistProds = wishlist.items.map((item) => {
+      const product = products.find(
+        (p) => p._id.toString() === item.productId._id.toString()
       );
-      const img = idx !== -1 ? productInfo.itemAvailableImages[6 * idx] : null;
+      const idx = product.itemAvailableColors.findIndex(
+        (color) => color === item.color
+      );
+      let itemPrice = product.itemPrice;
+      if (product.itemDiscount > 0) {
+        itemPrice = Math.round(
+          itemPrice - itemPrice * (product.itemDiscount / 100)
+        );
+      }
+      const img = idx !== -1 ? product.itemAvailableImages[6 * idx] : null;
       return {
-        _id: product._id,
-        productId: productInfo._id,
-        name: productInfo.itemName,
+        _id: item._id,
+        productId: product._id,
+        name: product.itemName,
         img,
-        color: product.color,
-        size: product.size,
-        price: product.price,
+        color: item.color,
+        size: item.size,
+        price: itemPrice,
       };
     });
     res.status(200).json({
@@ -736,16 +718,30 @@ exports.getCart = async (req, res, next) => {
         ok: false,
       });
     }
+    const productIds = cart.items.map((item) => item.productId._id);
+    const products = await Product.find({ _id: { $in: productIds } });
+    let totalPrice = 0;
     const cartItems = cart.items.map((item) => {
       const idx = item.productId.itemAvailableColors.findIndex(
         (color) => color === item.color
       );
+      const product = products.find(
+        (p) => p._id.toString() === item.productId._id.toString()
+      );
+      let itemPrice = product.itemPrice;
+      if (product.itemDiscount > 0) {
+        itemPrice = Math.round(
+          itemPrice - itemPrice * (product.itemDiscount / 100)
+        );
+      }
+      const price = itemPrice * item.quantity;
+      totalPrice += price;
       return {
         name: item.productId.itemName,
         img: item.productId.itemAvailableImages[6 * idx],
         color: item.color,
         size: item.size,
-        price: item.total,
+        price,
         _id: item._id,
         quantity: item.quantity,
         productId: item.productId._id,
@@ -753,7 +749,7 @@ exports.getCart = async (req, res, next) => {
     });
     res.status(200).json({
       ok: true,
-      cart: { items: cartItems, totalPrice: cart.totalPrice },
+      cart: { items: cartItems, totalPrice },
     });
   } catch (error) {
     next(error);
