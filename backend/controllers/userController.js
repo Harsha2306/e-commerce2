@@ -12,8 +12,9 @@ const mongoose = require("mongoose");
 exports.getProducts = async (req, res, next) => {
   try {
     const { category, sortBy, min, max, gender } = req.query;
+    console.log(category, sortBy, min, max, gender);
     const page = +req.query.page || 1;
-    const perPage = 12;
+    const perPage = 10;
     const totalProducts = await Product.find().countDocuments();
     if (!totalProducts) {
       throw handleError({
@@ -22,14 +23,7 @@ exports.getProducts = async (req, res, next) => {
         ok: false,
       });
     }
-    const maxPage = Math.ceil(totalProducts / perPage);
-    if (page > maxPage) {
-      throw handleError({
-        message: "No more products",
-        statusCode: 500,
-        ok: false,
-      });
-    }
+
     console.log(category, sortBy, min, max, gender, page);
     let categories;
     if (category) categories = category.split(",");
@@ -67,6 +61,14 @@ exports.getProducts = async (req, res, next) => {
       .limit(perPage);
 
     const filteredProducts = await Product.find(query).sort(sortOptions);
+    const maxPage = Math.ceil(filteredProducts.length / perPage);
+    if (page > maxPage) {
+      throw handleError({
+        message: "No more products",
+        statusCode: 500,
+        ok: false,
+      });
+    }
 
     if (!products || !filteredProducts) {
       throw handleError({
@@ -77,57 +79,12 @@ exports.getProducts = async (req, res, next) => {
     }
 
     let pagination = {};
+    pagination.previous = page - 1;
+    pagination.next = page + 1;
+    pagination.first = 1;
+    pagination.last = maxPage;
     pagination.filteredProducts = filteredProducts.length;
     pagination.page = page;
-    pagination.first = {};
-    pagination.second = {};
-    pagination.third = {};
-    pagination.first.isActive = false;
-    pagination.second.isActive = false;
-    pagination.third.isActive = false;
-    pagination.first.isDisabled = false;
-    pagination.second.isDisabled = false;
-    pagination.third.isDisabled = false;
-    pagination.previousIsDisabled = false;
-    pagination.nextIsDisabled = false;
-    pagination.totalProducts = totalProducts;
-    pagination.maxPage = maxPage;
-    if (page === 1) {
-      pagination.start = 1;
-      pagination.end = perPage * page;
-      pagination.first.isActive = true;
-      pagination.previousIsDisabled = true;
-      pagination.first.page = 1;
-      pagination.second.page = 2;
-      pagination.third.page = maxPage;
-      pagination.nextPage = page + 1;
-    } else if (page === maxPage) {
-      pagination.end = pagination.filteredProducts;
-      pagination.start = (page - 1) * perPage + 1;
-      pagination.third.isActive = true;
-      pagination.first.page = 1;
-      pagination.second.page = maxPage - 1;
-      pagination.third.page = maxPage;
-      pagination.nextIsDisabled = true;
-      pagination.previousPage = page - 1;
-    } else {
-      pagination.start = (page - 1) * perPage + 1;
-      pagination.nextPage = page + 1;
-      pagination.previousPage = page - 1;
-      pagination.second.isActive = true;
-      pagination.first.page = 1;
-      pagination.end = perPage * page;
-      pagination.second.page = page;
-      pagination.third.page = maxPage;
-    }
-    if (pagination.filteredProducts < perPage) {
-      pagination.nextIsDisabled = true;
-      pagination.second.isDisabled = true;
-      pagination.third.isDisabled = true;
-      if (page === 1 || page === maxPage) {
-        pagination.end = pagination.filteredProducts;
-      }
-    }
 
     res.status(200).json({
       ok: true,

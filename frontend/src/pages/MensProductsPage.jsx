@@ -7,8 +7,10 @@ import Product from "../components/Product";
 import { useGetProductsQuery } from "../api/UserApi";
 import ProductSkeleton from "../components/ProductSkeleton";
 import Pagination from "../components/Pagination";
+import {useNavigate} from "react-router-dom"
 
 const MensProductsPage = () => {
+  const navigateTo = useNavigate()
   const [products, setProducts] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
     gender: "Men",
@@ -42,10 +44,7 @@ const MensProductsPage = () => {
     if (data && data.ok) {
       setProducts(data.products);
     }
-  }, [error, isError, data, filterOptions]);
-
-  console.log(products);
-
+  }, [error, isError, data, filterOptions, navigateTo]);
   return (
     <Grid marginX={3} marginTop={15}>
       <Breadcrumbs>
@@ -63,7 +62,7 @@ const MensProductsPage = () => {
       >
         {!isLoading &&
           products.length !== 0 &&
-          `SHOWING ${data.pagination.start} TO ${data.pagination.end} OF ${data.pagination.filteredProducts} PRODUCTS`}
+          `SHOWING PAGE ${data.pagination.page} OF ${data.pagination.last}`}
       </Typography>
       <Grid display="flex" columnSpacing={3} rowSpacing={2} container>
         {!isLoading && products.length === 0 && (

@@ -1,22 +1,27 @@
-import React from "react";
-import { Grid, Typography } from "@mui/material";
+/* eslint-disable react/prop-types */
 import ListItem from "@mui/joy/ListItem";
-import Button from "@mui/joy/Button";
+import IconButton from "@mui/joy/IconButton";
 
-const PaginationItem = ({ to, onClick, isActive, isDisabled }) => {
+const PaginationItem = ({ onClick, isDisabled, startIcon }) => {
   return (
     <ListItem sx={{ padding: 0, margin: 0 }}>
-      <Button
+      <IconButton
         onClick={onClick}
         sx={{
           borderRadius: 0,
+          color: "white",
+          backgroundColor: "black",
+          "&:hover": {
+            color: "white",
+            backgroundColor: "black",
+            cursor: isDisabled ? "not-allowed" : "pointer",
+          },
         }}
         size="lg"
         disabled={isDisabled}
-        variant={isActive ? "solid" : "outlined"}
       >
-        <Typography variant="body1">{to}</Typography>
-      </Button>
+        {startIcon}
+      </IconButton>
     </ListItem>
   );
 };

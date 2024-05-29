@@ -1,40 +1,39 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 import List from "@mui/joy/List";
 import PaginationItem from "./PaginationItem";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import LastPageIcon from '@mui/icons-material/LastPage';
+import FirstPageIcon from "@mui/icons-material/FirstPage";
 
 const Pagination = ({ pagination, sendPage }) => {
-  console.log(pagination);
+
   return (
     <List orientation="horizontal">
       <PaginationItem
-        onClick={() => sendPage(pagination.previousPage)}
-        to="Previous"
-        isActive={false}
-        isDisabled={pagination.previousIsDisabled}
+        startIcon={<FirstPageIcon />}
+        onClick={() => sendPage(pagination.first)}
+        isDisabled={false}
       />
       <PaginationItem
-        onClick={() => sendPage(pagination.first.page)}
-        to="First"
-        isActive={pagination.first.isActive}
-        isDisabled={pagination.first.isDisabled}
+        startIcon={<NavigateBeforeIcon />}
+        onClick={() => sendPage(pagination.previous)}
+        isDisabled={pagination.previous <= 0}
       />
       <PaginationItem
-        onClick={() => sendPage(pagination.second.page)}
-        to={pagination.second.page}
-        isActive={pagination.second.isActive}
-        isDisabled={pagination.second.isDisabled}
+        startIcon={pagination.page}
+        onClick={() => sendPage(pagination.page)}
+        isDisabled={true}
       />
       <PaginationItem
-        onClick={() => sendPage(pagination.third.page)}
-        to="Last"
-        isActive={pagination.third.isActive}
-        isDisabled={pagination.third.isDisabled}
+        startIcon={<NavigateNextIcon />}
+        onClick={() => sendPage(pagination.next)}
+        isDisabled={pagination.next > pagination.last}
       />
       <PaginationItem
-        onClick={() => sendPage(pagination.nextPage)}
-        to="Next"
-        isActive={false}
-        isDisabled={pagination.nextIsDisabled}
+        startIcon={<LastPageIcon />}
+        onClick={() => sendPage(pagination.last)}
+        isDisabled={false}
       />
     </List>
   );

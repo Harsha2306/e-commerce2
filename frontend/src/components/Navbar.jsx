@@ -40,7 +40,7 @@ const Navbar = () => {
       >
         <Grid item xs={10} display="flex">
           <List sx={{ display: "flex", flexDirection: "row", p: 0 }}>
-            <NavItem navItemText={"Logo"} to="/" />
+            <NavItem navItemText={"Home"} to="/" />
             <NavItem navItemText={"New"} to="products/new" />
             <NavItem navItemText={"Men"} to="products/men" />
             <NavItem navItemText={"Women"} to="products/women" />

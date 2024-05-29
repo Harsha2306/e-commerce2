@@ -65,7 +65,7 @@ const FilterAndSort = ({ sendFilterOptions }) => {
         <ModalClose />
         <DialogTitle>Filter & Sort</DialogTitle>
         <Divider />
-        <AccordionGroup sx={{ maxWidth: 400 }}>
+        <AccordionGroup>
           <Accordion>
             <AccordionSummary>SORT BY</AccordionSummary>
             <AccordionDetails>

@@ -96,8 +96,8 @@ exports.login = async (req, res, next) => {
       },
       "7f93e4b124aae1d583527e1fc6750b72b39c78d183b5b365c6485b95b204a623",
       {
-        expiresIn: "24h",
-        //expiresIn: 60,
+        //expiresIn: "24h",
+        expiresIn: 60,
       }
     );
     const cart = await Cart.findOne({ userId: user._id });
