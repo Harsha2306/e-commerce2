@@ -7,15 +7,16 @@ import Product from "../components/Product";
 import { useGetProductsQuery } from "../api/UserApi";
 import ProductSkeleton from "../components/ProductSkeleton";
 import Pagination from "../components/Pagination";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 const MensProductsPage = () => {
-  const navigateTo = useNavigate()
+  const navigateTo = useNavigate();
   const [products, setProducts] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
     gender: "Men",
     page: "1",
   });
+  const [initialLoad, setInitialLoad] = useState(true);
   const { data, isLoading, isError, error } =
     useGetProductsQuery(filterOptions);
 
@@ -33,18 +34,15 @@ const MensProductsPage = () => {
   };
 
   useEffect(() => {
-    if (
-      isError &&
-      error &&
-      error.data &&
-      error.data.message === "jwt expired"
-    ) {
+    if (isError && error?.data?.message === "jwt expired") {
       navigateTo("/login");
     }
     if (data && data.ok) {
       setProducts(data.products);
+      setInitialLoad(false);
     }
-  }, [error, isError, data, filterOptions, navigateTo]);
+  }, [error, isError, data, navigateTo]);
+  console.log(isLoading);
   return (
     <Grid marginX={3} marginTop={15}>
       <Breadcrumbs>
@@ -57,7 +55,7 @@ const MensProductsPage = () => {
       </Breadcrumbs>
       <Divider />
       <FilterAndSort sendFilterOptions={getDataFromFilter} />
-      <Typography 
+      <Typography
         sx={{ fontSize: "30px", fontWeight: "600", marginBottom: "1rem" }}
       >
         {!isLoading &&
@@ -65,7 +63,7 @@ const MensProductsPage = () => {
           `SHOWING PAGE ${data.pagination.page} OF ${data.pagination.last}`}
       </Typography>
       <Grid display="flex" columnSpacing={3} rowSpacing={2} container>
-        {!isLoading && products.length === 0 && (
+        {!isLoading && !initialLoad && products.length === 0 && (
           <>
             <Grid
               height="300px"

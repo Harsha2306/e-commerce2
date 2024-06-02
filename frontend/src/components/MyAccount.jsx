@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Grid } from "@mui/material";
 import { Typography, Divider, Breadcrumbs } from "@mui/joy";
 import { Link } from "react-router-dom";
@@ -14,14 +14,14 @@ const MyAccount = () => {
   console.log(data, error, isLoading, isError, show);
 
   useEffect(() => {
-    if (error && error.status === 401) navigateTo("/login");
-    else if (error && error.data.message === "jwt expired") {
+    if (isError && error.status === 401) navigateTo("/login");
+    else if (isError && error.data.message === "jwt expired") {
       setShow(true);
       setTimeout(() => {
         navigateTo("/login");
       }, 2000);
     }
-  }, [error]);
+  }, [error, navigateTo, isError]);
 
   return (
     <>
@@ -35,8 +35,8 @@ const MyAccount = () => {
           <SessionExpiredAlert show={show} />
         </Grid>
       )}
-      {!isLoading && !isError && (
-        <Grid container mt={5} paddingX={6}>
+      {!isLoading && !isError && data && data.user && (
+        <Grid container mt={13} paddingX={6}>
           <Breadcrumbs sx={{ paddingX: "0px" }}>
             <Link style={{ color: "blue" }} to="/">
               <Typography variant="body1" sx={{ color: "blue" }}>

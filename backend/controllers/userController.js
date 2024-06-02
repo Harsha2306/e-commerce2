@@ -521,27 +521,11 @@ exports.changePassword = async (req, res, next) => {
           {
             field: "newPassword",
             errorMessage:
-              "new password doesn't match with confirm new password",
+              "New password doesn't match with confirm new password",
           },
         ],
         ok: false,
       });
-    if (
-      newPassword === currentPassword &&
-      currentPassword === confirmNewPassword
-    ) {
-      throw handleError({
-        message: "Validation Error",
-        statusCode: 422,
-        errorFields: [
-          {
-            field: "newPassword",
-            errorMessage: "new password can't be the previous password",
-          },
-        ],
-        ok: false,
-      });
-    }
     const userId = new mongoose.Types.ObjectId(req.userId);
     const user = await User.findOne({ _id: userId });
     if (!user)

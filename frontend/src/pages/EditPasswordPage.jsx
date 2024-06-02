@@ -10,56 +10,113 @@ import Alert from "@mui/joy/Alert";
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "changeCurrentPassword": {
+    case "ON_CURRENT_PASSWORD_CHANGE": {
       const updatedState = { ...state, currentPassword: action.payload };
-      updatedState.cpHasError = hasError(updatedState.currentPassword);
-      updatedState.cpErrorMessage = setErrorMessage(
+      updatedState.currentPassWordError = setErrorMessage(
         updatedState.currentPassword
       );
+      updatedState.currentPasswordHasError =
+        updatedState.currentPassWordError !== "";
       return updatedState;
     }
-    case "changeNewPassword": {
+    case "ON_NEW_PASSWORD_CHANGE": {
       const updatedState = { ...state, newPassword: action.payload };
-      updatedState.npHasError = hasError(updatedState.newPassword);
-      updatedState.npErrorMessage = setErrorMessage(updatedState.newPassword);
+      updatedState.newPasswordError = setErrorMessage(updatedState.newPassword);
+      updatedState.newPasswordHasError = updatedState.newPasswordError !== "";
+      if (
+        !updatedState.newPasswordHasError &&
+        updatedState.confirmNewPassword.trim().length !== 0
+      ) {
+        if (updatedState.newPassword !== updatedState.confirmNewPassword) {
+          updatedState.newPasswordHasError = true;
+          updatedState.newPasswordError =
+            "New password doesn't match with confirm new password";
+          updatedState.confirmNewPasswordHasError = true;
+          updatedState.confirmNewPasswordError =
+            "New password doesn't match with confirm new password";
+        } else {
+          updatedState.newPasswordError = setErrorMessage(
+            updatedState.newPassword
+          );
+          updatedState.newPasswordHasError =
+            updatedState.newPasswordError !== "";
+          updatedState.confirmNewPasswordError = setErrorMessage(
+            updatedState.confirmNewPassword
+          );
+          updatedState.confirmNewPasswordHasError =
+            updatedState.confirmNewPasswordError !== "";
+        }
+      }
       return updatedState;
     }
-    case "changeConfirmNewPassword": {
+    case "ON_CONFIRM_PASSWORD_CHANGE": {
       const updatedState = { ...state, confirmNewPassword: action.payload };
-      updatedState.cnpHasError = hasError(updatedState.confirmNewPassword);
-      updatedState.cnpErrorMessage = setErrorMessage(
+      updatedState.confirmNewPasswordError = setErrorMessage(
         updatedState.confirmNewPassword
       );
+      updatedState.confirmNewPasswordHasError =
+        updatedState.confirmNewPasswordError !== "";
+      if (
+        !updatedState.confirmNewPasswordHasError &&
+        updatedState.newPassword.trim().length !== 0
+      ) {
+        if (updatedState.newPassword !== updatedState.confirmNewPassword) {
+          updatedState.newPasswordHasError = true;
+          updatedState.newPasswordError =
+            "New password doesn't match with confirm new password";
+          updatedState.confirmNewPasswordHasError = true;
+          updatedState.confirmNewPasswordError =
+            "New password doesn't match with confirm new password";
+        } else {
+          updatedState.newPasswordError = setErrorMessage(
+            updatedState.newPassword
+          );
+          updatedState.newPasswordHasError =
+            updatedState.newPasswordError !== "";
+          updatedState.confirmNewPasswordError = setErrorMessage(
+            updatedState.confirmNewPassword
+          );
+          updatedState.confirmNewPasswordHasError =
+            updatedState.confirmNewPasswordError !== "";
+        }
+      }
       return updatedState;
     }
-    case "setErrorAndMessageCP": {
-      return { ...state, ...action.payload };
-    }
-    case "setErrorAndMessageNP": {
-      return { ...state, ...action.payload };
-    }
-    case "setErrorAndMessageCNP": {
-      return { ...state, ...action.payload };
-    }
-    case "reset": {
+    case "SET_CURRENT_PASSWORD_ERROR": {
       return {
         ...state,
-        cpHasError: false,
-        npHasError: false,
-        cnpHasError: false,
-        cpErrorMessage: "",
-        npErrorMessage: "",
-        cnpErrorMessage: "",
+        currentPasswordHasError: true,
+        currentPassWordError: action.payload,
+      };
+    }
+    case "SET_NEW_PASSWORD_ERROR": {
+      return {
+        ...state,
+        newPasswordHasError: true,
+        newPasswordError: action.payload,
+      };
+    }
+    case "SET_CONFIRM_NEW_PASSWORD_ERROR": {
+      return {
+        ...state,
+        confirmNewPasswordHasError: true,
+        confirmNewPasswordError: action.payload,
+      };
+    }
+    case "RESET": {
+      return {
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+        currentPasswordHasError: false,
+        newPasswordHasError: false,
+        confirmNewPasswordHasError: false,
+        currentPassWordError: "",
+        newPasswordError: "",
+        confirmNewPasswordError: "",
       };
     }
   }
-  throw Error("Unknown action: " + action.type);
-};
-
-const hasError = (password) => {
-  if (password.trim().length === 0) return true;
-  const pattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
-  return pattern.test(password) ? false : true;
 };
 
 const setErrorMessage = (password) => {
@@ -74,67 +131,71 @@ const EditPasswordPage = () => {
   const navigateTo = useNavigate();
   const [state, dispatch] = useReducer(reducer, {
     currentPassword: "",
-    cpHasError: false,
-    cpErrorMessage: "",
     newPassword: "",
-    npErrorMessage: "",
-    npHasError: false,
     confirmNewPassword: "",
-    cnpErrorMessage: "",
-    cnpHasError: false,
+    currentPasswordHasError: false,
+    newPasswordHasError: false,
+    confirmNewPasswordHasError: false,
+    currentPassWordError: "",
+    newPasswordError: "",
+    confirmNewPasswordError: "",
   });
-  console.log(state.newPassword, state.confirmNewPassword);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [show, setShow] = useState(false);
-  const [changePassword] = useChangePasswordMutation();
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
   const onSave = async () => {
-    console.log(state);
-    setIsUpdating(true);
-    dispatch({ type: "reset" });
-    const res = await changePassword(state);
+    const { currentPassword, newPassword, confirmNewPassword } = state;
+    const res = await changePassword({
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+    });
     if (res.error && res.error.data && res.error.data.errorFields) {
       res.error.data.errorFields.map((err) => {
-        if (err.field === "currentPassword")
+        if (err.field === "currentPassword") {
           dispatch({
-            type: "setErrorAndMessageCP",
-            payload: { cpHasError: true, cpErrorMessage: err.errorMessage },
+            type: "SET_CURRENT_PASSWORD_ERROR",
+            payload: err.errorMessage,
           });
-        if (err.field === "newPassword")
+        }
+        if (err.field === "newPassword") {
           dispatch({
-            type: "setErrorAndMessageNP",
-            payload: { npHasError: true, npErrorMessage: err.errorMessage },
+            type: "SET_NEW_PASSWORD_ERROR",
+            payload: err.errorMessage,
           });
-        if (err.field === "confirmNewPassword")
+        }
+        if (err.field === "confirmNewPassword") {
           dispatch({
-            type: "setErrorAndMessageCNP",
-            payload: { cnpHasError: true, cnpErrorMessage: err.errorMessage },
+            type: "SET_CONFIRM_NEW_PASSWORD_ERROR",
+            payload: err.errorMessage,
           });
+        }
       });
-    }
-    if (res.data && res.data.ok) {
+    } else {
+      dispatch({ type: "RESET" });
       setShow(true);
       setTimeout(() => {
-        navigateTo("/account");
-        setShow(false);
+        onBackToMyAccount();
       }, 2000);
     }
-    setIsUpdating(false);
   };
+  const onBackToMyAccount = () => navigateTo("/account");
+  const disabled =
+    state.currentPasswordHasError ||
+    state.newPasswordHasError ||
+    state.confirmNewPasswordHasError ||
+    state.currentPassword.trim().length === 0 ||
+    state.newPassword.trim().length === 0 ||
+    state.confirmNewPassword.trim().length === 0;
+
   return (
     <>
-      {isLoading && (
-        <Grid paddingY={10} display="flex" justifyContent="center">
-          <CircularProgress color="neutral" size="lg" />
-        </Grid>
-      )}
-      {!isLoading && show && (
+      {show && (
         <Alert color="success">
           Password updated successfully. Redirecting to Account Page
         </Alert>
       )}
-      {!isLoading && (
-        <Grid paddingX={6}>
+      {
+        <Grid paddingX={6} mt={!show ? 12 : 0}>
           <Breadcrumbs sx={{ paddingX: "0px" }}>
             <Link style={{ color: "blue" }} to="/">
               <Typography variant="body1" sx={{ color: "blue" }}>
@@ -168,7 +229,7 @@ const EditPasswordPage = () => {
               <TextField
                 onChange={(e) =>
                   dispatch({
-                    type: "changeCurrentPassword",
+                    type: "ON_CURRENT_PASSWORD_CHANGE",
                     payload: e.target.value,
                   })
                 }
@@ -186,9 +247,9 @@ const EditPasswordPage = () => {
                     },
                 }}
               />
-              {state.cpHasError && (
+              {state.currentPasswordHasError && (
                 <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-                  {state.cpErrorMessage}
+                  {state.currentPassWordError}
                 </Typography>
               )}
             </Grid>
@@ -201,7 +262,7 @@ const EditPasswordPage = () => {
               <TextField
                 onChange={(e) =>
                   dispatch({
-                    type: "changeNewPassword",
+                    type: "ON_NEW_PASSWORD_CHANGE",
                     payload: e.target.value,
                   })
                 }
@@ -219,9 +280,9 @@ const EditPasswordPage = () => {
                     },
                 }}
               />
-              {state.npHasError && (
+              {state.newPasswordHasError && (
                 <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-                  {state.npErrorMessage}
+                  {state.newPasswordError}
                 </Typography>
               )}
             </Grid>
@@ -235,7 +296,7 @@ const EditPasswordPage = () => {
                 value={state.confirmNewPassword}
                 onChange={(e) =>
                   dispatch({
-                    type: "changeConfirmNewPassword",
+                    type: "ON_CONFIRM_PASSWORD_CHANGE",
                     payload: e.target.value,
                   })
                 }
@@ -252,9 +313,9 @@ const EditPasswordPage = () => {
                     },
                 }}
               />
-              {state.cnpHasError && (
+              {state.confirmNewPasswordHasError && (
                 <Typography sx={{ color: "rgb(182 41 6)" }} level="body-sm">
-                  {state.cnpErrorMessage}
+                  {state.confirmNewPasswordError}
                 </Typography>
               )}
             </Grid>
@@ -264,7 +325,7 @@ const EditPasswordPage = () => {
                   onClick={onSave}
                   margin="0px 0px 15px 0px"
                   variant="contained"
-                  text="save"
+                  text={!isLoading && "save"}
                   width="95%"
                   height="40px"
                   color="white"
@@ -274,9 +335,9 @@ const EditPasswordPage = () => {
                     backgroundColor: "black",
                   }}
                   startIcon={
-                    isUpdating && <CircularProgress size="sm" color="neutral" />
+                    isLoading && <CircularProgress size="sm" color="neutral" />
                   }
-                  disabled={isUpdating}
+                  disabled={isLoading || disabled}
                 />
               </Grid>
               <Grid xs display="flex" justifyContent="flex-end" item>
@@ -289,12 +350,13 @@ const EditPasswordPage = () => {
                   color="white"
                   backgroundColor="black"
                   hoverStyles={{ color: "white", backgroundColor: "black" }}
+                  onClick={onBackToMyAccount}
                 />
               </Grid>
             </Grid>
           </Grid>
         </Grid>
-      )}
+      }
     </>
   );
 };
