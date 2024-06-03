@@ -195,7 +195,7 @@ const LoginPage = () => {
           }
           onClick={login}
           disabled={isLoginButtonDisabled}
-          text="Login"
+          text={!isLoading && "Login"}
           height="50px"
           color={isLoginButtonDisabled ? "rgb(59 64 71)" : "white"}
           backgroundColor={isLoginButtonDisabled ? "rgb(189 193 197)" : "black"}

@@ -21,8 +21,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [postRegister] = usePostRegisterMutation();
+  const [postRegister, {isLoading: loading}] = usePostRegisterMutation();
   const navigateTo = useNavigate();
 
   const isRegisterButtonDisabled = !(
@@ -117,7 +116,6 @@ const RegisterPage = () => {
   };
 
   const registerUser = async () => {
-    setLoading(true);
     const res = await postRegister({
       firstName,
       lastName,
@@ -147,7 +145,6 @@ const RegisterPage = () => {
     if (res.data && res.data.ok) {
       navigateTo("/login");
     }
-    setLoading(false);
   };
 
   return (
@@ -321,7 +318,7 @@ const RegisterPage = () => {
             }
             onClick={registerUser}
             disabled={isRegisterButtonDisabled}
-            text="Sign up"
+            text={!loading && "Sign up"}
             height="50px"
             color={isRegisterButtonDisabled ? "rgb(59 64 71)" : "white"}
             backgroundColor={
