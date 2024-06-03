@@ -6,9 +6,8 @@ import { useGetCartQuery } from "../api/UserApi";
 import { useState, useEffect } from "react";
 import CircularProgress from "@mui/joy/CircularProgress";
 import useFormattedPrice from "../hooks/useFormattedPrice";
-import { useLocation } from "react-router-dom";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const CartPage = () => {
   const { data, error, isLoading, isError, refetch } = useGetCartQuery();
@@ -30,7 +29,6 @@ const CartPage = () => {
       } else if (error.data.message === "No cart found") setEmpty(true);
     }
     if (!isError && !isLoading && data) {
-      data.cart.items.forEach((i) => console.log(i));
       setCart(data.cart.items);
       setTotalPrice(data.cart.totalPrice);
       setEmpty(data.cart.items.length === 0);

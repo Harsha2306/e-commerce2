@@ -9,6 +9,10 @@ import { useState, useEffect } from "react";
 import { useGetSearchedProductsQuery } from "../api/UserApi";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate } from "react-router-dom";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -22,7 +26,7 @@ const Search = () => {
   });
   const [wait, setWait] = useState(false);
   const navigateTo = useNavigate();
-  
+
   //debouncing the search with some delay
   useEffect(() => {
     setWait(true);
@@ -84,7 +88,46 @@ const Search = () => {
         </Grid>
         <Divider />
         {search.trim().length === 0 ? (
-          <></>
+          <>
+            {isLoading && (
+              <Grid
+                height="600px"
+                container
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <CircularProgress color="inherit" />
+              </Grid>
+            )}
+            {!isLoading && !isError && (
+              <Grid padding={3}>
+                <Typography level="title-lg" endDecorator={<TrendingUpIcon />}>
+                  Trending searches
+                </Typography>
+                <List>
+                  {data?.trendingSearchs &&
+                    data.trendingSearchs.map((trendingSearch) => (
+                      <ListItem
+                        onClick={() => {
+                          navigateTo(`/products/${trendingSearch._id}`),
+                            setOpen(false);
+                        }}
+                        sx={{
+                          padding: 0,
+                          color: "darkgray",
+                          "&:hover": { color: "black", cursor: "pointer" },
+                          width: "max-content",
+                        }}
+                        key={trendingSearch._id}
+                      >
+                        <ListItemText>{trendingSearch.itemName}</ListItemText>
+                      </ListItem>
+                    ))}
+                </List>
+              </Grid>
+            )}
+          </>
         ) : (
           <>
             {isLoading | wait ? (

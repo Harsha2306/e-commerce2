@@ -4,14 +4,29 @@ import { Typography, Divider, Breadcrumbs } from "@mui/joy";
 import { Link } from "react-router-dom";
 import { useGetUserDetailsQuery } from "../api/UserApi";
 import CircularProgress from "@mui/joy/CircularProgress";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import SessionExpiredAlert from "./SessionExpiredAlert";
+import { useDispatch } from "react-redux";
+import { setToken, setLogin } from "../redux-store/TokenSlice";
+import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
 
 const MyAccount = () => {
   const navigateTo = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
   const [show, setShow] = useState(false);
-  const { data, error, isLoading, isError } = useGetUserDetailsQuery();
-  console.log(data, error, isLoading, isError, show);
+  const { data, error, isLoading, isError, refetch } = useGetUserDetailsQuery();
+
+  const onLogout = () => {
+    localStorage.removeItem("token");
+    dispatch(setToken(undefined));
+    dispatch(setLogin(false));
+    dispatch(setCartCount(0));
+    dispatch(setWishlistCount(0));
+    navigateTo("/");
+  };
+
+  console.log(data);
 
   useEffect(() => {
     if (isError && error.status === 401) navigateTo("/login");
@@ -22,6 +37,10 @@ const MyAccount = () => {
       }, 2000);
     }
   }, [error, navigateTo, isError]);
+
+  useEffect(() => {
+    refetch();
+  }, [location, refetch]);
 
   return (
     <>
@@ -70,17 +89,21 @@ const MyAccount = () => {
               style={{
                 textDecorationColor: "black",
                 textDecorationThickness: "2px",
+                display: "inline-block",
               }}
             >
               <Typography level="title-md">CHANGE PASSWORD</Typography>
             </Link>
+            <br />
             <Link
+              onClick={onLogout}
               style={{
                 textDecorationColor: "black",
                 textDecorationThickness: "2px",
+                display: "inline-block",
               }}
             >
-              <Typography mt={2} level="title-md">
+              <Typography width={"max-content"} mt={2} level="title-md">
                 LOGOUT
               </Typography>
             </Link>

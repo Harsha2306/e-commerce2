@@ -40,7 +40,17 @@ const CartItem = ({
   const dispatch = useDispatch();
 
   const onCartItemClick = () => {
-    navigateTo(`/products/${productId}`);
+    if (size.trim().length === 0)
+      navigateTo(`/products/${productId}?color=${color}`);
+    else if (size.includes("UK")) {
+      navigateTo(
+        `/products/${productId}?color=${color}&size=${size
+          .split(" ")
+          .join("_")}`
+      );
+    } else {
+      navigateTo(`/products/${productId}?color=${color}&size=${size}`);
+    }
   };
 
   const onRemoveButtonClick = async () => {
@@ -76,7 +86,13 @@ const CartItem = ({
 
   return (
     <Grid border={1.5} borderColor="lightgray" mb={3} container item xs={12}>
-      <Grid padding={2} xs={3} item>
+      <Grid
+        padding={2}
+        xs={3}
+        item
+        onClick={onCartItemClick}
+        sx={{ "&:hover": { cursor: "pointer" } }}
+      >
         <img src={img} alt="error" style={{ width: "100%", height: "100%" }} />
       </Grid>
       <Grid xs ml={2} padding={2} item>

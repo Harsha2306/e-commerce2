@@ -1,4 +1,5 @@
 import { Grid } from "@mui/material";
+import { useEffect } from "react";
 import { Typography } from "@mui/joy";
 import ProductCarousel from "../components/ProductCarousel";
 import Panel from "../components/Panel";
@@ -8,10 +9,17 @@ import MessageOutlinedIcon from "@mui/icons-material/MessageOutlined";
 import ImageContainer from "../components/ImageContainer";
 import Footer from "../components/Footer";
 import { useGetRecommendedAndNewArrivalsQuery } from "../api/UserApi";
+import { useLocation } from "react-router-dom";
 
 const LandingPage = () => {
-  const { data, isLoading, error, isError } =
+  const location = useLocation();
+  const { data, isLoading, isError, refetch } =
     useGetRecommendedAndNewArrivalsQuery();
+
+  useEffect(() => {
+    refetch();
+  }, [location, refetch]);
+
   return (
     <>
       {!isLoading && !isError && (

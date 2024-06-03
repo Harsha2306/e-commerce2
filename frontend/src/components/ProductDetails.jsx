@@ -3,6 +3,7 @@ import { Grid, Typography } from "@mui/material";
 import Size from "./Size";
 import StyledButton from "./StyledButton";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import ProductColorImage from "./ProductColorImage";
 import ImgContainer from "./ImgContainer";
 import Breadcrumbs from "@mui/joy/Breadcrumbs";
@@ -19,7 +20,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import CircularProgressJ from "@mui/joy/CircularProgress";
 import SessionExpiredAlert from "./SessionExpiredAlert";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { setCartCount } from "../redux-store/userSlice";
 import { useDispatch } from "react-redux";
 import useGetPrice from "../hooks/useGetPrice";
@@ -45,6 +46,9 @@ const colorValueStyles = {
 
 const ProductDetails = () => {
   const { productId } = useParams();
+  const [searchParams] = useSearchParams();
+  const size = searchParams.get("size")?.split("_").join(" ");
+  const color = searchParams.get("color");
   const navigateTo = useNavigate();
   const { pathname } = useLocation();
   const dispatch = useDispatch();
@@ -62,7 +66,6 @@ const ProductDetails = () => {
     data,
     isError: getProductError,
     isLoading: getProductLoading,
-    error,
   } = useGetProductByIdQuery({ productId });
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [addToWishlist, { isLoading: isAddingToWishlist }] =
@@ -73,16 +76,18 @@ const ProductDetails = () => {
       selectedSize,
       selectedColor,
     });
-
+  
   useEffect(() => {
     if (data && !getProductLoading) {
       if (!getProductError) {
         setProduct(data.product);
-        setSelectedSize(data.product.itemAvailableSizes?.[0] || "");
-        setSelectedColor(data.product.itemAvailableColors?.[0] || "");
+        if (color) setSelectedColor(color);
+        else setSelectedColor(data.product.itemAvailableColors?.[0] || "");
+        if (size) setSelectedSize(size);
+        else setSelectedSize(data.product.itemAvailableSizes?.[0] || "");
       }
     }
-  }, [getProductLoading, data, getProductError, product]);
+  }, [getProductLoading, data, getProductError, product, color, size]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -250,35 +255,37 @@ const ProductDetails = () => {
                 <Grid paddingTop={2} paddingX={1} item>
                   <p style={colorStyles}>Color</p>
                 </Grid>
-                <ColorContext.Provider
-                  value={{ selectedColor, setSelectedColor }}
-                >
-                  <Grid
-                    item
-                    direction="row"
-                    container
-                    paddingBottom={3}
-                    paddingX={1}
+                {selectedColor && (
+                  <ColorContext.Provider
+                    value={{ selectedColor, setSelectedColor }}
                   >
-                    <Grid paddingBottom={3} xs={12} item>
-                      <p style={colorValueStyles}>{selectedColor}</p>
+                    <Grid
+                      item
+                      direction="row"
+                      container
+                      paddingBottom={3}
+                      paddingX={1}
+                    >
+                      <Grid paddingBottom={3} xs={12} item>
+                        <p style={colorValueStyles}>{selectedColor}</p>
+                      </Grid>
+                      <Grid container xs={12} item>
+                        {data &&
+                          data.colorsWithImages &&
+                          data.colorsWithImages.map((clr) => (
+                            <ProductColorImage
+                              key={clr.color}
+                              colorValue={clr.color}
+                              src={clr.imgs[0]}
+                            />
+                          ))}
+                      </Grid>
                     </Grid>
-                    <Grid container xs={12} item>
-                      {data &&
-                        data.colorsWithImages &&
-                        data.colorsWithImages.map((clr) => (
-                          <ProductColorImage
-                            key={clr.color}
-                            colorValue={clr.color}
-                            src={clr.imgs[0]}
-                          />
-                        ))}
-                    </Grid>
-                  </Grid>
-                </ColorContext.Provider>
+                  </ColorContext.Provider>
+                )}
                 <hr style={{ margin: "0px 0px 0px 8px" }} />
                 <Grid item direction="row" container paddingX={1} paddingY={3}>
-                  {selectedSize !== "" && (
+                  {selectedSize && (
                     <SizeContext.Provider
                       value={{ selectedSize, setSelectedSize }}
                     >
@@ -339,6 +346,9 @@ const ProductDetails = () => {
                       startIcon={
                         isAddingToWishlist ? (
                           <CircularProgressJ size="sm" color="neutral" />
+                        ) : checkIfProductPresentInWishlistAndCart?.data
+                            .addedToWishList ? (
+                          <FavoriteIcon />
                         ) : (
                           <FavoriteBorderIcon />
                         )

@@ -443,12 +443,12 @@ exports.removeFromWishlist = async (req, res, next) => {
 };
 
 exports.checkIfProductPresentInWishlistAndCart = async (req, res, next) => {
-  const { productId, selectedSize, selectedColor } = req.query;
+  const { productId, selectedSize = "", selectedColor } = req.query;
   let addedToWishList, addedToCart;
   try {
     if (isAuthorizedFlag(req)) {
       const userId = new mongoose.Types.ObjectId(req.userId);
-      if (productId && selectedSize && selectedColor) {
+      if (productId && selectedColor) {
         const wishList = await Wishlist.findOne({ userId });
         if (wishList) {
           addedToWishList = wishList.items.find(
@@ -574,7 +574,7 @@ exports.changePassword = async (req, res, next) => {
 exports.search = async (req, res, next) => {
   try {
     const text = req.query.search;
-    let products;
+    let products, trendingSearchs;
     if (text.trim().length === 0) {
       products = [];
     } else {
@@ -588,9 +588,17 @@ exports.search = async (req, res, next) => {
           statusCode: 404,
         });
     }
+    const trendingProducts = await Product.aggregate([
+      { $sample: { size: 6 } },
+    ]);
+    trendingSearchs = trendingProducts.map((product) => ({
+      _id: product._id,
+      itemName: product.itemName,
+    }));
     res.status(200).json({
       ok: true,
       products,
+      trendingSearchs,
     });
   } catch (error) {
     next(error);

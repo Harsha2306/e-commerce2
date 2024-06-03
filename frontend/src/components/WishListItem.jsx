@@ -46,6 +46,20 @@ const WishListItem = ({
     refetch();
   };
 
+  const onWishlistItemClick = () => {
+    if (size.trim().length === 0)
+      navigateTo(`/products/${productId}?color=${color}`);
+    else if (size.includes("UK")) {
+      navigateTo(
+        `/products/${productId}?color=${color}&size=${size
+          .split(" ")
+          .join("_")}`
+      );
+    } else {
+      navigateTo(`/products/${productId}?color=${color}&size=${size}`);
+    }
+  };
+
   const onAddToCartButtonClick = async () => {
     const res = await addToCart({
       productId,
@@ -58,11 +72,20 @@ const WishListItem = ({
 
   return (
     <Grid item xs={12} container>
-      <Grid xs={3} item>
+      <Grid
+        xs={3}
+        item
+        onClick={onWishlistItemClick}
+        sx={{ "&:hover": { cursor: "pointer" } }}
+      >
         <img src={img} alt="error" style={{ width: "100%", height: "100%" }} />
       </Grid>
       <Grid padding={2} xs item>
-        <Typography level="title-lg" sx={{ fontSize: "25px" }}>
+        <Typography
+          onClick={onWishlistItemClick}
+          level="title-lg"
+          sx={{ fontSize: "25px", "&:hover": { cursor: "pointer" } }}
+        >
           {name}
         </Typography>
         <Typography mb={2} sx={{ color: "rgb(108 108 108)" }} level="body-lg">

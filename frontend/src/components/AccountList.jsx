@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { setToken, setLogin } from "../redux-store/TokenSlice";
+import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
 
 const AccountList = () => {
   const navigateTo = useNavigate();
@@ -19,7 +20,9 @@ const AccountList = () => {
     localStorage.removeItem("token");
     dispatch(setToken(undefined));
     dispatch(setLogin(false));
-    navigateTo("/login");
+    dispatch(setCartCount(0));
+    dispatch(setWishlistCount(0));
+    navigateTo("/");
   };
 
   const registerHereClickHandler = () => {
