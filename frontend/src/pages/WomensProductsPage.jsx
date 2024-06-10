@@ -1,12 +1,7 @@
-import React from "react";
-import Pagination from "../components/Pagination";
+import ProductsPage from "../components/ProductsPage";
 
 const WomensProductsPage = () => {
-  return (
-    <>
-      <Pagination />
-    </>
-  );
+  return <ProductsPage gender="Women" />;
 };
 
 export default WomensProductsPage;

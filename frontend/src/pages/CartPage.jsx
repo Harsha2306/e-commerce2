@@ -18,9 +18,12 @@ const CartPage = () => {
   const location = useLocation();
   const [show, setShow] = useState(false);
   const navigateTo = useNavigate();
-  
+
   useEffect(() => {
     if (isError) {
+      if (error.data.message === "Not Authorized") {
+        navigateTo("/login");
+      }
       if (error.data.message === "jwt expired") {
         setShow(true);
         setTimeout(() => {
@@ -47,13 +50,15 @@ const CartPage = () => {
     );
   }
 
+  if (isError && error?.data?.message === "jwt expired")
+    return (
+      <Grid mt={5}>
+        <SessionExpiredAlert show={show} />
+      </Grid>
+    );
+
   return (
     <>
-      {!isLoading && isError && (
-        <Grid mt={5}>
-          <SessionExpiredAlert show={show} />
-        </Grid>
-      )}
       <Grid mt={10} container paddingX={4}>
         {!isLoading && empty && (
           <Grid
@@ -67,7 +72,7 @@ const CartPage = () => {
             <Typography level="h2">YOUR CART IS EMPTY</Typography>
           </Grid>
         )}
-        {!isError && !isLoading && !empty && (
+        {!isError && !isLoading && !empty && data && (
           <>
             <Grid item my={3} xs={12}>
               <Typography level="h2" sx={{ fontWeight: "350" }}>

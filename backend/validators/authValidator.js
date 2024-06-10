@@ -73,3 +73,15 @@ exports.validateLoginCredentials = [
       "Password must contain at least 8 characters, including at least one uppercase letter, one lowercase letter, and one digit."
     ),
 ];
+
+exports.validateEmailForForgotPassword = check("email")
+  .trim()
+  .notEmpty()
+  .withMessage("You need to have a valid email.")
+  .isEmail()
+  .withMessage("You need to have a valid email.")
+  .custom(async (value) => {
+    const existingUser = await User.findOne({ email: value });
+    if (!existingUser)
+      throw new Error("No user found with this e-mail address");
+  });

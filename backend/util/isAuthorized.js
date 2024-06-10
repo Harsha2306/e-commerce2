@@ -1,13 +1,12 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const { handleError } = require("./handleError");
-
-const SECRET =
-  "7f93e4b124aae1d583527e1fc6750b72b39c78d183b5b365c6485b95b204a623";
 
 exports.isAuthorized = (req, res, next) => {
   try {
     const authHeader = req.get("Authorization");
+    console.log(authHeader)
     if (!authHeader) {
       throw handleError({
         message: "Not Authorized",
@@ -23,7 +22,7 @@ exports.isAuthorized = (req, res, next) => {
         ok: false,
       });
     }
-    const decodedToken = jwt.verify(token, SECRET);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     if (!decodedToken) {
       throw handleError({
         message: "Not Authorized",
@@ -32,6 +31,7 @@ exports.isAuthorized = (req, res, next) => {
       });
     }
     req.userId = decodedToken.userId;
+    req.isAdmin = decodedToken.isAdmin;
   } catch (error) {
     next(error);
   }
@@ -44,7 +44,7 @@ exports.isAuthorizedFlag = (req) => {
     if (!authHeader) return false;
     const token = authHeader.split(" ")[1];
     if (!token) return false;
-    const decodedToken = jwt.verify(token, SECRET);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     if (!decodedToken) return false;
     req.userId = decodedToken.userId;
     return true;

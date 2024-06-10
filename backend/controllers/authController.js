@@ -3,7 +3,9 @@ const Cart = require("../models/cart");
 const Wishlist = require("../models/wishlist");
 const { handleError } = require("../util/handleError");
 
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 
@@ -89,27 +91,144 @@ exports.login = async (req, res, next) => {
         ],
       });
     }
+    const isAdmin = user?.email === "admin@gmail.com";
     const token = jwt.sign(
       {
         email: user.email,
         userId: user._id.toString(),
+        isAdmin,
       },
-      "7f93e4b124aae1d583527e1fc6750b72b39c78d183b5b365c6485b95b204a623",
+      process.env.JWT_SECRET,
       {
         expiresIn: "24h",
         //expiresIn: 60,
       }
     );
-    const cart = await Cart.findOne({ userId: user._id });
-    const wishlist = await Wishlist.findOne({ userId: user._id });
-    const cartCount = cart ? cart.items.length : 0;
-    const wishlistCount = wishlist ? wishlist.items.length : 0;
-    console.log(token);
+
+    if (isAdmin) {
+      res.status(200).json({
+        token,
+        ok: true,
+        isAdmin,
+      });
+    } else {
+      const cart = await Cart.findOne({ userId: user._id });
+      const wishlist = await Wishlist.findOne({ userId: user._id });
+      const cartCount = cart ? cart.items.length : 0;
+      const wishlistCount = wishlist ? wishlist.items.length : 0;
+      res.status(200).json({
+        token,
+        ok: true,
+        cartCount,
+        isAdmin,
+        wishlistCount,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorFields = errors.array().map((err) => {
+        return { field: err.path, errorMessage: err.msg };
+      });
+      throw handleError({
+        message: "Validation Error",
+        statusCode: 422,
+        errorFields,
+        ok: false,
+      });
+    }
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      from: "passwordreset@store.com",
+      subject: "Password Reset",
+      text: `You are receiving this because you have requested the reset of the password for your account.\n\n
+      Please click on the following link, or paste this into your browser to complete the process:\n\n
+      http://localhost:5173/reset/${token}\n\n
+      If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+    };
+
+    transporter.sendMail(mailOptions, (err) => {
+      if (err) {
+        console.error("There was an error: ", err);
+        return res.status(500).send("Error sending email.");
+      }
+      res.status(200).send("Password reset email sent.");
+    });
+
     res.status(200).json({
-      token,
       ok: true,
-      cartCount,
-      wishlistCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.resetForgottenPassword = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorFields = errors.array().map((err) => {
+        return { field: err.path, errorMessage: err.msg };
+      });
+      throw handleError({
+        message: "Validation Error",
+        statusCode: 422,
+        errorFields,
+        ok: false,
+      });
+    }
+
+    const { password, token } = req.body;
+    const verify = jwt.verify(token, process.env.JWT_SECRET);
+    if (!verify)
+      throw handleError({
+        message: "Invalid or expired token.",
+        statusCode: 404,
+        ok: false,
+      });
+    const user = await User.findById(verify.id);
+    if (!user)
+      throw handleError({
+        message: "user not found",
+        statusCode: 404,
+        ok: false,
+      });
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    user.password = hashedPassword;
+    const updatedUser = await user.save();
+    if (!updatedUser)
+      throw handleError({
+        message: "user not saved",
+        statusCode: 500,
+        ok: false,
+      });
+
+    res.status(200).json({
+      ok: true,
     });
   } catch (error) {
     next(error);

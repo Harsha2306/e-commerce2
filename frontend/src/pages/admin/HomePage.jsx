@@ -14,13 +14,19 @@ const HomePage = () => {
   const navigateTo = useNavigate();
   const location = useLocation();
 
+  console.log(data, error);
+
   useEffect(() => {
     if (!isLoading) {
-      if (!isError) {
+      if (isError) {
+        if (error.data.message === "Not Authorized") {
+          navigateTo("/login");
+        }
+      } else {
         setProducts(data.products);
       }
     }
-  }, [data, isError, isLoading]);
+  }, [data, error, isError, isLoading, navigateTo]);
 
   useEffect(() => {
     refetch();

@@ -1,4 +1,4 @@
-import React from "react";
+/* eslint-disable react/prop-types */
 import { ListItem, ListItemText } from "@mui/material";
 import { Typography } from "@mui/joy";
 import { NavLink } from "react-router-dom";
@@ -16,7 +16,7 @@ const listItemStyles = {
   "&:hover": hoverStyles,
 };
 
-const NavItem = ({ navItemText, to, isAdmin }) => {
+const NavItem = ({ navItemText, to }) => {
   return (
     <ListItem sx={listItemStyles}>
       <ListItemText>

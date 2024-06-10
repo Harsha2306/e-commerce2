@@ -47,53 +47,55 @@ const WishlistPage = () => {
       </Grid>
     );
 
+  if (isError && error?.data?.message === "jwt expired")
+    return (
+      <Grid mt={5}>
+        <SessionExpiredAlert show={show} />
+      </Grid>
+    );
+
   return (
     <>
-      {!isLoading && isError && (
-        <Grid mt={5}>
-          <SessionExpiredAlert show={show} />
+      {!isLoading && (
+        <Grid
+          item
+          mt={15}
+          padding={3}
+          borderRadius={3}
+          sx={{ border: "1px solid lightgrey", marginX: "5rem" }}
+        >
+          <Typography level="h2" sx={{ fontWeight: "350" }}>
+            MY WISHLIST
+          </Typography>
+          <Divider sx={{ marginY: "1rem" }} />
+          {empty && (
+            <Typography
+              level="title-lg"
+              sx={{ fontSize: "30px", textAlign: "center" }}
+            >
+              Your Wishlist is Empty
+            </Typography>
+          )}
+          {!empty && (
+            <Grid rowSpacing={2} container>
+              {wishlist.map((product) => (
+                <WishlistItem
+                  _id={product._id}
+                  key={product._id}
+                  name={product.name}
+                  price={product.price}
+                  size={product.size}
+                  color={product.color}
+                  img={product.img}
+                  productId={product.productId}
+                  refetch={refetch}
+                  length={wishlist.length}
+                />
+              ))}
+            </Grid>
+          )}
         </Grid>
       )}
-      {!isLoading && (
-          <Grid
-            item
-            mt={15}
-            padding={3}
-            borderRadius={3}
-            sx={{ border: "1px solid lightgrey", marginX: "5rem" }}
-          >
-            <Typography level="h2" sx={{ fontWeight: "350" }}>
-              MY WISHLIST
-            </Typography>
-            <Divider sx={{ marginY: "1rem" }} />
-            {empty && (
-              <Typography
-                level="title-lg"
-                sx={{ fontSize: "30px", textAlign: "center" }}
-              >
-                Your Wishlist is Empty
-              </Typography>
-            )}
-            {!empty && (
-              <Grid rowSpacing={2} container>
-                {wishlist.map((product) => (
-                  <WishlistItem
-                    _id={product._id}
-                    key={product._id}
-                    name={product.name}
-                    price={product.price}
-                    size={product.size}
-                    color={product.color}
-                    img={product.img}
-                    productId={product.productId}
-                    refetch={refetch}
-                    length={wishlist.length}
-                  />
-                ))}
-              </Grid>
-            )}
-          </Grid>
-        )}
     </>
   );
 };

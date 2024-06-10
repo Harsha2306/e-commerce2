@@ -1,13 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes");
-const user = require("./models/user");
 
-const URI =
-  "mongodb+srv://harsharevanth5:L8dnP66EuVwekvlM@cluster0.9hzxydh.mongodb.net/ecommerce";
+const URI = process.env.MONGODB_URI;
 const PORT = 4000;
 
 const app = express();

@@ -21,5 +21,16 @@ router.post(
   authValidator.validateLoginCredentials,
   authController.login
 );
-module.exports = router;
 
+router.post(
+  "/forgotPassword",
+  authValidator.validateEmailForForgotPassword,
+  authController.forgotPassword
+);
+
+router.post(
+  "/resetForgottenPassword",
+  authValidator.validatePassword,
+  authController.resetForgottenPassword
+);
+module.exports = router;

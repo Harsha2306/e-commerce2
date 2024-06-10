@@ -10,6 +10,7 @@ import ImageContainer from "../components/ImageContainer";
 import Footer from "../components/Footer";
 import { useGetRecommendedAndNewArrivalsQuery } from "../api/UserApi";
 import { useLocation } from "react-router-dom";
+import CircularProgress from "@mui/joy/CircularProgress";
 
 const LandingPage = () => {
   const location = useLocation();
@@ -19,6 +20,14 @@ const LandingPage = () => {
   useEffect(() => {
     refetch();
   }, [location, refetch]);
+
+  if (isLoading) {
+    return (
+      <Grid paddingY={10} display="flex" justifyContent="center">
+        <CircularProgress color="neutral" size="lg" />
+      </Grid>
+    );
+  }
 
   return (
     <>

@@ -16,6 +16,8 @@ import CartPage from "./pages/CartPage";
 import OrdersPage from "./pages/OrdersPage";
 import HomePage from "./pages/admin/HomePage";
 import AddProductPage from "./pages/admin/AddProductPage";
+import ForgotPassword from "./pages/ForgotPassword";
+import PasswordReset from "./pages/PasswordReset";
 
 const router = createBrowserRouter([
   { path: "/admin", element: <HomePage /> },
@@ -37,6 +39,8 @@ const router = createBrowserRouter([
       { path: "/account/edit-password", element: <EditPasswordPage /> },
       { path: "/cart", element: <CartPage /> },
       { path: "/order-history", element: <OrdersPage /> },
+      { path: "/forgotPassword", element: <ForgotPassword /> },
+      { path: "/reset/:token", element: <PasswordReset /> },
     ],
   },
 ]);

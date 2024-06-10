@@ -15,7 +15,7 @@ const ProductCarousel = ({ heading, products, isLoading }) => {
           overflowX: "auto",
           display: "grid",
           scrollSnapType: "x",
-          gridTemplateColumns: "repeat(10, calc(25% - 2rem))",
+          gridTemplateColumns: "repeat(10, calc(25% - 6rem))",
           gap: "1.5rem",
           paddingBottom: "1rem",
           marginBottom: "1rem",

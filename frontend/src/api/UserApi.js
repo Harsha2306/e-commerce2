@@ -85,6 +85,20 @@ export const userApi = createApi({
     getCart: builder.query({
       query: () => "/cart",
     }),
+    forgotPassword: builder.mutation({
+      query: (email) => ({
+        url: "/forgotPassword",
+        method: "post",
+        body: email,
+      }),
+    }),
+    resetForgottenPassword: builder.mutation({
+      query: (details) => ({
+        url: "/resetForgottenPassword",
+        method: "post",
+        body: details,
+      }),
+    }),
   }),
 });
 
@@ -103,5 +117,7 @@ export const {
   useRemoveFromCartMutation,
   useRemoveEntireItemFromCartMutation,
   useRemoveFromWishlistMutation,
-  useGetCheckIfProductPresentInWishlistAndCartQuery
+  useGetCheckIfProductPresentInWishlistAndCartQuery,
+  useForgotPasswordMutation,
+  useResetForgottenPasswordMutation,
 } = userApi;

@@ -1,7 +1,7 @@
-import React from "react";
+import ProductsPage from "../components/ProductsPage";
 
 const KidsProductsPage = () => {
-  return <></>;
+  return <ProductsPage gender="Kids" />;
 };
 
 export default KidsProductsPage;

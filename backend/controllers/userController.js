@@ -12,7 +12,6 @@ const mongoose = require("mongoose");
 exports.getProducts = async (req, res, next) => {
   try {
     const { category, sortBy, min, max, gender } = req.query;
-    console.log(category, sortBy, min, max, gender);
     const page = +req.query.page || 1;
     const perPage = 10;
     const totalProducts = await Product.find().countDocuments();
@@ -30,7 +29,7 @@ exports.getProducts = async (req, res, next) => {
 
     let query = { itemGender: gender };
     if (categories && categories.length > 0) {
-      query = { itemCategory: { $in: categories } };
+      query.itemCategory = { $in: categories };
     }
     if (min || max) {
       if (!query.itemPrice) {
@@ -63,10 +62,9 @@ exports.getProducts = async (req, res, next) => {
     const filteredProducts = await Product.find(query).sort(sortOptions);
     const maxPage = Math.ceil(filteredProducts.length / perPage);
     if (page > maxPage) {
-      throw handleError({
-        message: "No more products",
-        statusCode: 500,
-        ok: false,
+      res.status(200).json({
+        ok: true,
+        products: [],
       });
     }
 
@@ -124,7 +122,7 @@ exports.getProductById = async (req, res, next) => {
       );
       colorsWithImages.push(colorWithImage);
     });
-    const products = await Product.find({ itemGender: product.itemGender });
+    const products = await Product.find();
     if (!products) {
       throw handleError({
         message: "No products found",

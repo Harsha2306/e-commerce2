@@ -6,8 +6,7 @@ const Product = require("../models/product");
 const mongoose = require("mongoose");
 const product = require("../models/product");
 
-// TODO add isAdmin Check
-exports.getALLProducts = async (req, res, next) => {
+exports.getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.find();
     if (!products)

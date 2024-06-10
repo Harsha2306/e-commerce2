@@ -10,6 +10,36 @@ import { useDispatch } from "react-redux";
 import { setToken, setLogin } from "../redux-store/TokenSlice";
 import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
 
+const validatePassword = (password, cb) => {
+  if (password.trim().length === 0) {
+    cb(true);
+    return "Please fill out this field.";
+  }
+  const pattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+  if (pattern.test(password)) {
+    cb(false);
+    return "";
+  } else {
+    cb(true);
+    return "Password must contain at least 8 characters, including at least one uppercase letter, one lowercase letter, and one digit.";
+  }
+};
+
+const validateEmail = (email, cb) => {
+  if (email.trim().length === 0) {
+    cb(true);
+    return "Please fill out this field.";
+  }
+  const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (pattern.test(email)) {
+    cb(false);
+    return "";
+  } else {
+    cb(true);
+    return "You need to have a valid email.";
+  }
+};
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
@@ -31,42 +61,12 @@ const LoginPage = () => {
 
   const emailChangeHandler = (e) => {
     setEmail(e.target.value);
-    setEmailErrorMessage(validateEmail(e.target.value));
+    setEmailErrorMessage(validateEmail(e.target.value, setEmailError));
   };
 
   const passwordChangeHandler = (e) => {
     setPassword(e.target.value);
-    setPasswordErrorMessage(validatePassword(e.target.value));
-  };
-
-  const validatePassword = (password) => {
-    if (password.trim().length === 0) {
-      setPasswordError(true);
-      return "Please fill out this field.";
-    }
-    const pattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
-    if (pattern.test(password)) {
-      setPasswordError(false);
-      return "";
-    } else {
-      setPasswordError(true);
-      return "Password must contain at least 8 characters, including at least one uppercase letter, one lowercase letter, and one digit.";
-    }
-  };
-
-  const validateEmail = (email) => {
-    if (email.trim().length === 0) {
-      setEmailError(true);
-      return "Please fill out this field.";
-    }
-    const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (pattern.test(email)) {
-      setEmailError(false);
-      return "";
-    } else {
-      setEmailError(true);
-      return "You need to have a valid email.";
-    }
+    setPasswordErrorMessage(validatePassword(e.target.value, setPasswordError));
   };
 
   const login = async () => {
@@ -90,7 +90,8 @@ const LoginPage = () => {
       dispatch(setLogin(true));
       dispatch(setCartCount(res.data.cartCount));
       dispatch(setWishlistCount(res.data.wishlistCount));
-      navigateTo("/");
+      console.log(res.data);
+      navigateTo(res.data.isAdmin ? "/admin" : "/");
     }
     setIsLoading(false);
   };
@@ -224,7 +225,10 @@ const LoginPage = () => {
             }}
             level="title-sm"
           >
-            <Link style={{ textDecoration: "none", color: "black" }}>
+            <Link
+              style={{ textDecoration: "none", color: "black" }}
+              to="/forgotPassword"
+            >
               FORGOTTEN YOUR PASSWORD ?
             </Link>
           </Typography>
