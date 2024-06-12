@@ -8,8 +8,10 @@ import CircularProgress from "@mui/joy/CircularProgress";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
 import { useNavigate, useLocation } from "react-router-dom";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const CartPage = () => {
+  useIsLoggedIn();
   const { data, error, isLoading, isError, refetch } = useGetCartQuery();
   const [cart, setCart] = useState([]);
   const [empty, setEmpty] = useState(false);

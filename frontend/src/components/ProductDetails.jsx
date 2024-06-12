@@ -26,6 +26,7 @@ import { useDispatch } from "react-redux";
 import useGetPrice from "../hooks/useGetPrice";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import { setWishlistCount } from "../redux-store/userSlice";
+import { useSelector } from "react-redux";
 
 export const SizeContext = createContext();
 export const ColorContext = createContext();
@@ -45,6 +46,7 @@ const colorValueStyles = {
 };
 
 const ProductDetails = () => {
+  const isLoggedIn = useSelector((state) => state.token.isLoggedIn);
   const { productId } = useParams();
   const [searchParams] = useSearchParams();
   const size = searchParams.get("size")?.split("_").join(" ");
@@ -76,7 +78,7 @@ const ProductDetails = () => {
       selectedSize,
       selectedColor,
     });
-  
+
   useEffect(() => {
     if (data && !getProductLoading) {
       if (!getProductError) {
@@ -105,6 +107,7 @@ const ProductDetails = () => {
 
   const handleClose = () => setOpenMiniDialog(false);
   const handleOpenCart = async () => {
+    if (!isLoggedIn) navigateTo("/");
     // TODO check jwt expired case for every api call
     const res = await addToCart({
       productId,
@@ -141,6 +144,7 @@ const ProductDetails = () => {
   };
 
   const handleOpenWishlist = async () => {
+    if (!isLoggedIn) navigateTo("/login");
     const res = await addToWishlist({
       productId,
       size: selectedSize,
@@ -186,9 +190,9 @@ const ProductDetails = () => {
               <Link
                 style={{ color: "blue" }}
                 color="primary"
-                to="/products/men"
+                to={"/products/" + product.itemGender}
               >
-                <Typography variant="body1">Men</Typography>
+                <Typography variant="body1">{product.itemGender}</Typography>
               </Link>
               <Typography variant="body1">{product.itemName}</Typography>
             </Breadcrumbs>

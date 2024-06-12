@@ -91,7 +91,7 @@ exports.login = async (req, res, next) => {
         ],
       });
     }
-    const isAdmin = user?.email === "admin@gmail.com";
+    const isAdmin = user._id.toString() === process.env.ADMIN_ID;
     const token = jwt.sign(
       {
         email: user.email,
@@ -100,18 +100,17 @@ exports.login = async (req, res, next) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "24h",
-        //expiresIn: 60,
+        //expiresIn: "24h",
+        expiresIn: "30m",
       }
     );
-
-    if (isAdmin) {
+    if (isAdmin)
       res.status(200).json({
         token,
-        ok: true,
         isAdmin,
+        ok: true,
       });
-    } else {
+    else {
       const cart = await Cart.findOne({ userId: user._id });
       const wishlist = await Wishlist.findOne({ userId: user._id });
       const cartCount = cart ? cart.items.length : 0;
@@ -120,7 +119,6 @@ exports.login = async (req, res, next) => {
         token,
         ok: true,
         cartCount,
-        isAdmin,
         wishlistCount,
       });
     }

@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Grid } from "@mui/material";
 import { Typography, Divider } from "@mui/joy";
 import OrderItem from "../components/OrderItem";
 import { useGetOrdersQuery } from "../api/UserApi";
 import CircularProgress from "@mui/joy/CircularProgress";
 import { useNavigate } from "react-router-dom";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const OrdersPage = ({ isEmpty = !true }) => {
+  useIsLoggedIn();
   const { data, isLoading, isError, error } = useGetOrdersQuery();
   const navigateTo = useNavigate();
+
   useEffect(() => {
     if (
       isError &&

@@ -4,10 +4,15 @@ const { handleError } = require("../util/handleError");
 const Product = require("../models/product");
 
 const mongoose = require("mongoose");
-const product = require("../models/product");
 
 exports.getAllProducts = async (req, res, next) => {
   try {
+    if (req.isAdmin === false)
+      throw handleError({
+        message: "Not Authorized",
+        statusCode: 401,
+        ok: false,
+      });
     const products = await Product.find();
     if (!products)
       throw handleError({
@@ -26,6 +31,12 @@ exports.getAllProducts = async (req, res, next) => {
 
 exports.getProductById = async (req, res, next) => {
   try {
+    if (req.isAdmin === false)
+      throw handleError({
+        message: "Not Authorized",
+        statusCode: 401,
+        ok: false,
+      });
     let { productId } = req.params;
     let product, colors, imgs;
     if (productId !== "null") {
@@ -54,6 +65,12 @@ exports.getProductById = async (req, res, next) => {
 
 exports.postProduct = async (req, res, next) => {
   try {
+    if (req.isAdmin === false)
+      throw handleError({
+        message: "Not Authorized",
+        statusCode: 401,
+        ok: false,
+      });
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const errorFields = errors.array().map((err) => {

@@ -6,8 +6,10 @@ import CircularProgress from "@mui/joy/CircularProgress";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const WishlistPage = () => {
+  useIsLoggedIn()
   let { data, isLoading, error, isError, refetch } = useGetWishlistQuery();
   const [wishlist, setWishlist] = useState([]);
   const [empty, setEmpty] = useState(false);

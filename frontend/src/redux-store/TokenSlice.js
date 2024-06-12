@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   token: undefined,
   isLoggedIn: false,
+  isAdmin: false,
 };
 
 export const tokenSlice = createSlice({
@@ -15,9 +16,12 @@ export const tokenSlice = createSlice({
     setLogin: (state, action) => {
       state.isLoggedIn = action.payload;
     },
+    setIsAdmin: (state, action) => {
+      state.isAdmin = action.payload;
+    },
   },
 });
 
-export const { setToken, setLogin } = tokenSlice.actions;
+export const { setToken, setLogin, setIsAdmin } = tokenSlice.actions;
 
 export default tokenSlice.reducer;

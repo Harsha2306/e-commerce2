@@ -17,7 +17,7 @@ const AdminProduct = ({ children, _id, itemName }) => {
     <Grid
       item
       margin={2}
-      sx={{ width: "272px", "&:hover": { cursor: "pointer" } }}
+      sx={{ width: "270px", "&:hover": { cursor: "pointer" } }}
       container
     >
       <Grid item>{children}</Grid>

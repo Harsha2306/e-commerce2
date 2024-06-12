@@ -18,10 +18,19 @@ import HomePage from "./pages/admin/HomePage";
 import AddProductPage from "./pages/admin/AddProductPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import PasswordReset from "./pages/PasswordReset";
+import AdminNavBar from "./components/admin/AdminNavBar";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
 
 const router = createBrowserRouter([
-  { path: "/admin", element: <HomePage /> },
-  { path: "/admin/add-product", element: <AddProductPage /> },
+  {
+    path: "/admin",
+    element: <AdminNavBar />,
+    children: [
+      { path: "/admin", element: <HomePage /> },
+      { path: "/admin/add-product", element: <AddProductPage /> },
+      { path: "/admin/login", element: <AdminLoginPage /> },
+    ],
+  },
   {
     path: "/",
     element: <Navbar />,
@@ -40,9 +49,9 @@ const router = createBrowserRouter([
       { path: "/cart", element: <CartPage /> },
       { path: "/order-history", element: <OrdersPage /> },
       { path: "/forgotPassword", element: <ForgotPassword /> },
-      { path: "/reset/:token", element: <PasswordReset /> },
     ],
   },
+  { path: "/reset/:token", element: <PasswordReset /> },
 ]);
 
 function App() {

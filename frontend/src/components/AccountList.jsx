@@ -22,7 +22,7 @@ const AccountList = () => {
     dispatch(setLogin(false));
     dispatch(setCartCount(0));
     dispatch(setWishlistCount(0));
-    navigateTo("/");
+    navigateTo("/login");
   };
 
   const registerHereClickHandler = () => {

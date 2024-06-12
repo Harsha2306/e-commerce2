@@ -176,6 +176,7 @@ const AddProductPage = () => {
   const location = useLocation();
 
   useEffect(() => {
+    console.log(error);
     if (!isLoading) {
       if (!isError && data) {
         const { product, colors, imgs } = data;
@@ -194,8 +195,11 @@ const AddProductPage = () => {
           setItemAvailableImages(imgs);
         }
       }
-      if (isError && error.data.message === INVALID_PRODUCT_ID) {
+      if (isError && error?.data?.message === INVALID_PRODUCT_ID) {
         navigateTo("/admin");
+      }
+      if (isError && error?.data?.message === "Not Authorized") {
+        navigateTo("/admin/login");
       }
     }
   }, [

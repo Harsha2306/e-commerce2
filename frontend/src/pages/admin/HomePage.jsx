@@ -14,15 +14,14 @@ const HomePage = () => {
   const navigateTo = useNavigate();
   const location = useLocation();
 
-  console.log(data, error);
-
   useEffect(() => {
     if (!isLoading) {
       if (isError) {
-        if (error.data.message === "Not Authorized") {
-          navigateTo("/login");
+        console.log(error);
+        if (error?.data?.message === "Not Authorized") {
+          navigateTo("/admin/login");
         }
-      } else {
+      } else if (data?.products) {
         setProducts(data.products);
       }
     }
@@ -58,7 +57,7 @@ const HomePage = () => {
             />
           </Grid>
           <Grid container>
-            {products.map((product) => (
+            {products?.map((product) => (
               <AdminProduct
                 key={product._id}
                 _id={product._id}

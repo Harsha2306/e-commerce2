@@ -9,8 +9,10 @@ import SessionExpiredAlert from "./SessionExpiredAlert";
 import { useDispatch } from "react-redux";
 import { setToken, setLogin } from "../redux-store/TokenSlice";
 import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const MyAccount = () => {
+      useIsLoggedIn();
   const navigateTo = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();

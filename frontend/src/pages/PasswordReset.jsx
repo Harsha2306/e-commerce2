@@ -3,9 +3,10 @@ import { Typography } from "@mui/joy";
 import { useState } from "react";
 import CircularProgress from "@mui/joy/CircularProgress";
 import StyledButton from "../components/StyledButton";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useResetForgottenPasswordMutation } from "../api/UserApi";
 import SuccessfullPasswordResetAlert from "../components/SuccessfullPasswordResetAlert";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const validatePassword = (password, cb) => {
   if (password.trim().length === 0) {
@@ -23,8 +24,8 @@ const validatePassword = (password, cb) => {
 };
 
 const PasswordReset = () => {
+  useIsLoggedIn();
   const { token } = useParams();
-  const navigateTo = useNavigate();
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
@@ -36,8 +37,6 @@ const PasswordReset = () => {
     setPassword(e.target.value);
     setPasswordErrorMessage(validatePassword(e.target.value, setPasswordError));
   };
-
-  console.log(isError);
 
   const onReset = async () => {
     const res = await reset({ password, token });
@@ -51,22 +50,21 @@ const PasswordReset = () => {
         }
       });
     } else if (res?.error?.data?.message === "jwt expired") {
-      setMsgText("Token Expired. Redirecting to login page");
+      setMsgText("Token Expired.");
       setPassword("");
       setShow(true);
-      setTimeout(() => navigateTo("/login"), 2000);
+    } else if (res?.error?.data?.message === "invalid signature") {
+      setMsgText("Invalid Token.");
+      setPassword("");
+      setShow(true);
     } else if (res?.error?.data?.message) {
-      setMsgText(
-        "An error occured, Please contact your administrator. Redirecting to login page"
-      );
+      setMsgText("An error occured, Please contact your administrator");
       setPassword("");
       setShow(true);
-      setTimeout(() => navigateTo("/login"), 2000);
     } else {
-      setMsgText("Password changed successfully. Redirecting to login page");
+      setMsgText("Password changed successfully. Please login");
       setPassword("");
       setShow(true);
-      setTimeout(() => navigateTo("/login"), 2000);
     }
   };
 

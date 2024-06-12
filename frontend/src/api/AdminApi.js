@@ -2,7 +2,13 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const adminApi = createApi({
   reducerPath: "adminApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:4000/admin" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: "http://localhost:4000/admin",
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("token");
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+    },
+  }),
   endpoints: (builder) => ({
     getProducts: builder.query({
       query: () => "/",
@@ -44,4 +50,8 @@ export const adminApi = createApi({
   }),
 });
 
-export const { usePostAddProductMutation, useGetProductsQuery, useGetProductByIdQuery } = adminApi;
+export const {
+  usePostAddProductMutation,
+  useGetProductsQuery,
+  useGetProductByIdQuery,
+} = adminApi;
