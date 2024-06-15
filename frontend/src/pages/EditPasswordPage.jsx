@@ -7,6 +7,7 @@ import { useChangePasswordMutation } from "../api/UserApi";
 import { useReducer, useState } from "react";
 import CircularProgress from "@mui/joy/CircularProgress";
 import Alert from "@mui/joy/Alert";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -128,6 +129,7 @@ const setErrorMessage = (password) => {
 };
 
 const EditPasswordPage = () => {
+  useIsLoggedIn();
   const navigateTo = useNavigate();
   const [state, dispatch] = useReducer(reducer, {
     currentPassword: "",

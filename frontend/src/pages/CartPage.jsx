@@ -2,16 +2,18 @@ import { Grid } from "@mui/material";
 import { Typography, Divider } from "@mui/joy";
 import CartItem from "../components/CartItem";
 import StyledButton from "../components/StyledButton";
-import { useGetCartQuery } from "../api/UserApi";
+import { useGetCartQuery, usePostOrderMutation } from "../api/UserApi";
 import { useState, useEffect } from "react";
 import CircularProgress from "@mui/joy/CircularProgress";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
 import { useNavigate, useLocation } from "react-router-dom";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
+import { setCartCount } from "../redux-store/userSlice";
+import { useDispatch } from "react-redux";
 
 const CartPage = () => {
-  useIsLoggedIn();
+   useIsLoggedIn();
   const { data, error, isLoading, isError, refetch } = useGetCartQuery();
   const [cart, setCart] = useState([]);
   const [empty, setEmpty] = useState(false);
@@ -20,6 +22,9 @@ const CartPage = () => {
   const location = useLocation();
   const [show, setShow] = useState(false);
   const navigateTo = useNavigate();
+  const [postOrder, { isLoading: isAdding, isError: errorWhileOrdering }] =
+    usePostOrderMutation();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (isError) {
@@ -43,6 +48,17 @@ const CartPage = () => {
   useEffect(() => {
     refetch();
   }, [location, refetch]);
+
+  console.log(isAdding);
+
+  const checkOut = async () => {
+    const res = await postOrder();
+    if (res.error) {
+    } else {
+      dispatch(setCartCount(0));
+      navigateTo("/order-history");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -156,6 +172,7 @@ const CartPage = () => {
                 </Grid>
                 <Grid item>
                   <StyledButton
+                    onClick={checkOut}
                     text="Check Out"
                     height="40px"
                     color="white"

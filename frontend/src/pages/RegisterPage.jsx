@@ -357,7 +357,6 @@ const RegisterPage = () => {
             </Link>
           </Typography>
         </Grid>
-        <Footer />
       </Grid>
     </>
   );

@@ -12,7 +12,7 @@ import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const MyAccount = () => {
-      useIsLoggedIn();
+  useIsLoggedIn()
   const navigateTo = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();

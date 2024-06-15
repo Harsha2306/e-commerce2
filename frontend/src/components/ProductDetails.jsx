@@ -27,6 +27,7 @@ import useGetPrice from "../hooks/useGetPrice";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import { setWishlistCount } from "../redux-store/userSlice";
 import { useSelector } from "react-redux";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 export const SizeContext = createContext();
 export const ColorContext = createContext();
@@ -46,6 +47,7 @@ const colorValueStyles = {
 };
 
 const ProductDetails = () => {
+  useIsLoggedIn()
   const isLoggedIn = useSelector((state) => state.token.isLoggedIn);
   const { productId } = useParams();
   const [searchParams] = useSearchParams();
@@ -107,7 +109,7 @@ const ProductDetails = () => {
 
   const handleClose = () => setOpenMiniDialog(false);
   const handleOpenCart = async () => {
-    if (!isLoggedIn) navigateTo("/");
+    if (!isLoggedIn) navigateTo("/login");
     // TODO check jwt expired case for every api call
     const res = await addToCart({
       productId,
@@ -289,7 +291,7 @@ const ProductDetails = () => {
                 )}
                 <hr style={{ margin: "0px 0px 0px 8px" }} />
                 <Grid item direction="row" container paddingX={1} paddingY={3}>
-                  {selectedSize && (
+                  {selectedSize && setSelectedSize && (
                     <SizeContext.Provider
                       value={{ selectedSize, setSelectedSize }}
                     >

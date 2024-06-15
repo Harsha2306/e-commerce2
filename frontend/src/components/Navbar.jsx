@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Search from "./Search";
 import IconButton from "@mui/material/IconButton";
-import Footer from "../components/Footer";
 
 const Navbar = () => {
   const navigateTo = useNavigate();
@@ -41,7 +40,6 @@ const Navbar = () => {
         <Grid item xs={10} display="flex">
           <List sx={{ display: "flex", flexDirection: "row", p: 0 }}>
             <NavItem navItemText={"Home"} to="/" />
-            <NavItem navItemText={"New"} to="products/new" />
             <NavItem navItemText={"Men"} to="products/men" />
             <NavItem navItemText={"Women"} to="products/women" />
             <NavItem navItemText={"Kids"} to="products/kids" />
@@ -95,9 +93,10 @@ const Navbar = () => {
       <Grid sx={{ marginTop: "80px" }}>
         <Outlet />
       </Grid>
-      {/* <Footer/> */}
     </>
   );
 };
 
 export default Navbar;
+
+//TODO sort by, price range - discount price

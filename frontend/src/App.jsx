@@ -8,7 +8,6 @@ import ProductDetailsPage from "./pages/ProductDetailsPage";
 import WomensProductsPage from "./pages/WomensProductsPage";
 import MensProductsPage from "./pages/MensProductsPage";
 import KidsProductsPage from "./pages/KidsProductsPage";
-import NewProductsPage from "./pages/NewProductsPage";
 import WishlistPage from "./pages/WishlistPage";
 import DashboardPage from "./pages/DashboardPage";
 import EditPasswordPage from "./pages/EditPasswordPage";
@@ -20,6 +19,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import PasswordReset from "./pages/PasswordReset";
 import AdminNavBar from "./components/admin/AdminNavBar";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import PageNotFound from "./pages/PageNotFound";
 
 const router = createBrowserRouter([
   {
@@ -42,7 +42,6 @@ const router = createBrowserRouter([
       { path: "/products/men", element: <MensProductsPage /> },
       { path: "/products/women", element: <WomensProductsPage /> },
       { path: "/products/kids", element: <KidsProductsPage /> },
-      { path: "/products/new", element: <NewProductsPage /> },
       { path: "/products/:productId", element: <ProductDetailsPage /> },
       { path: "/account", element: <DashboardPage /> },
       { path: "/account/edit-password", element: <EditPasswordPage /> },
@@ -52,6 +51,7 @@ const router = createBrowserRouter([
     ],
   },
   { path: "/reset/:token", element: <PasswordReset /> },
+  { path: "*", element: <PageNotFound /> },
 ]);
 
 function App() {

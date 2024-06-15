@@ -1,6 +1,8 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import { Typography } from "@mui/joy";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import EmailIcon from "@mui/icons-material/Email";
 
 const Footer = () => {
   return (
@@ -8,7 +10,6 @@ const Footer = () => {
       mt={5}
       container
       sx={{
-        height: "100px",
         backgroundColor: "black",
         width: "100%",
         position: "relative",
@@ -20,10 +21,60 @@ const Footer = () => {
         justifyContent="center"
         alignItems="center"
         xs={4}
+        container
       >
-        <Typography sx={{ color: "white" }} level="title-lg">
-          Get in touch
-        </Typography>
+        <Grid
+          display="flex"
+          justifyContent="center"
+          item
+          xs={12}
+          paddingTop={2}
+        >
+          <Typography sx={{ color: "white" }} level="title-lg">
+            CONTACT
+          </Typography>
+        </Grid>
+        <Grid
+          xs={8}
+          container
+          item
+          display="flex"
+          justifyContent="space-around"
+          p={3}
+        >
+          <Grid display="flex" justifyContent="space-around" item xs>
+            <LinkedInIcon
+              sx={{ color: "white", "&:hover": { cursor: "pointer" } }}
+              fontSize="large"
+              onClick={() =>
+                window.open(
+                  "https://www.linkedin.com/in/harsha-revanth-manchikanti/",
+                  "_blank"
+                )
+              }
+            />
+          </Grid>
+          <Grid display="flex" justifyContent="space-around" item xs>
+            <GitHubIcon
+              onClick={() =>
+                window.open("https://github.com/Harsha2306", "_blank")
+              }
+              sx={{ color: "white" }}
+              fontSize="large"
+            />
+          </Grid>
+          <Grid
+            display="flex"
+            justifyContent="space-around"
+            item
+            onClick={() =>
+              (window.location.href = "mailto:harsharevanth5@gmail.com")
+            }
+            xs
+          >
+            <EmailIcon sx={{ color: "white" }} fontSize="large" />
+          </Grid>
+        </Grid>
       </Grid>
       <Grid
         item
@@ -33,7 +84,7 @@ const Footer = () => {
         xs={4}
       >
         <Typography sx={{ color: "white" }} level="title-lg">
-          ©2024 Website name
+          ©2024 STORE
         </Typography>
       </Grid>
       <Grid

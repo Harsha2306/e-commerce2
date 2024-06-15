@@ -4,7 +4,7 @@ import { Grid, Typography } from "@mui/material";
 import { SizeContext } from "./ProductDetails";
 
 const Size = ({ productSize }) => {
-  const { selectedSize, setSelectedSize } = useContext(SizeContext);
+  const { selectedSize = undefined, setSelectedSize = undefined } = useContext(SizeContext);
   const onSizeClick = () => setSelectedSize(productSize);
 
   return (

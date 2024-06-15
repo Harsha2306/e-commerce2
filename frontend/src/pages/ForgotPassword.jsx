@@ -5,6 +5,7 @@ import CircularProgress from "@mui/joy/CircularProgress";
 import StyledButton from "../components/StyledButton";
 import { useForgotPasswordMutation } from "../api/UserApi";
 import { useNavigate } from "react-router-dom";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const validateEmail = (email, cb) => {
   if (email.trim().length === 0) {
@@ -22,6 +23,7 @@ const validateEmail = (email, cb) => {
 };
 
 const ForgotPassword = () => {
+  useIsLoggedIn()
   const navigateTo = useNavigate();
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);

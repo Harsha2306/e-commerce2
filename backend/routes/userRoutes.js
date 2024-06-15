@@ -7,7 +7,6 @@ const passwordChangeValidator = require("../validators/passwordChangeValidator")
 const router = express.Router();
 
 router.get("/products", userController.getProducts);
-router.get("/orders", isAuthorized, userController.getOrders);
 router.get("/product", userController.getProductById);
 router.get(
   "/products/recommendedAndNewArrivals",
@@ -44,5 +43,8 @@ router.post(
 router.get("/search", userController.search);
 router.get("/wishlist", isAuthorized, userController.getWishlist);
 router.get("/cart", isAuthorized, userController.getCart);
+router.post("/newOrder", isAuthorized, userController.postOrder);
+router.get("/orders", isAuthorized, userController.getOrders);
+router.get("/user", isAuthorized, userController.getUserProperties);
 
 module.exports = router;

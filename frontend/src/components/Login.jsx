@@ -71,6 +71,8 @@ const Login = ({ isAdmin }) => {
   };
 
   const login = async () => {
+    localStorage.removeItem("token")
+    dispatch(setToken(undefined));
     setIsLoading(true);
     const res = await postLogin({ email, password });
     if (res.error && res.error.data && res.error.data.errorFields) {

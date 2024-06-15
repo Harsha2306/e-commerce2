@@ -11,8 +11,10 @@ import Footer from "../components/Footer";
 import { useGetRecommendedAndNewArrivalsQuery } from "../api/UserApi";
 import { useLocation } from "react-router-dom";
 import CircularProgress from "@mui/joy/CircularProgress";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const LandingPage = () => {
+  useIsLoggedIn();
   const location = useLocation();
   const { data, isLoading, isError, refetch } =
     useGetRecommendedAndNewArrivalsQuery();

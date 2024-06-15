@@ -13,10 +13,19 @@ const productSchema = new Schema(
     itemAvailableSizes: [{ type: String, required: true }],
     itemAvailableColors: [{ type: String, required: true }],
     itemAvailableImages: [{ type: String, required: true }],
+    discountedPrice: { type: Number },
   },
   {
     timestamps: true,
   }
 );
+
+productSchema.methods.getDiscountedPrice = function () {
+  if (this.itemDiscount && this.itemDiscount > 0) {
+    const discountAmount = (this.itemPrice * this.itemDiscount) / 100;
+    return this.itemPrice - discountAmount;
+  }
+  return this.itemPrice;
+};
 
 module.exports = mongoose.model("product", productSchema);

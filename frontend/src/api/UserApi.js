@@ -99,6 +99,15 @@ export const userApi = createApi({
         body: details,
       }),
     }),
+    postOrder: builder.mutation({
+      query: () => ({
+        url: "/newOrder",
+        method: "post",
+      }),
+    }),
+    getUserProperties: builder.query({
+      query: () => "/user",
+    }),
   }),
 });
 
@@ -120,4 +129,6 @@ export const {
   useGetCheckIfProductPresentInWishlistAndCartQuery,
   useForgotPasswordMutation,
   useResetForgottenPasswordMutation,
+  usePostOrderMutation,
+  useGetUserPropertiesQuery
 } = userApi;

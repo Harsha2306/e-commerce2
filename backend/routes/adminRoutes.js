@@ -6,8 +6,6 @@ const adminValidator = require("../validators/adminValidator");
 
 const router = express.Router();
 
-//TODO make admin authorized code already implemented
-
 router.get("/", isAuthorized, adminController.getAllProducts);
 router.post(
   "/add-product",

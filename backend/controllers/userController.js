@@ -3,6 +3,7 @@ const { handleError } = require("../util/handleError");
 const Cart = require("../models/cart");
 const Wishlist = require("../models/wishlist");
 const User = require("../models/user");
+const Order = require("../models/order");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const { isAuthorizedFlag } = require("../util/isAuthorized");
@@ -32,13 +33,13 @@ exports.getProducts = async (req, res, next) => {
       query.itemCategory = { $in: categories };
     }
     if (min || max) {
-      if (!query.itemPrice) {
-        query.itemPrice = {};
+      if (!query.discountedPrice) {
+        query.discountedPrice = {};
         if (min !== undefined) {
-          query.itemPrice.$gte = min;
+          query.discountedPrice.$gte = min;
         }
         if (max !== undefined) {
-          query.itemPrice.$lte = max;
+          query.discountedPrice.$lte = max;
         }
       }
     }
@@ -46,9 +47,9 @@ exports.getProducts = async (req, res, next) => {
     let sortOptions = {};
     if (sortBy) {
       if (sortBy === "asc") {
-        sortOptions = { itemPrice: 1 };
+        sortOptions = { discountedPrice: 1 };
       } else if (sortBy === "dsc") {
-        sortOptions = { itemPrice: -1 };
+        sortOptions = { discountedPrice: -1 };
       } else if (sortBy === "latest") {
         sortOptions = { createdAt: -1 };
       }
@@ -92,12 +93,6 @@ exports.getProducts = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-exports.getOrders = async (req, res, next) => {
-  res.status(200).json({
-    ok: true,
-  });
 };
 
 exports.getProductById = async (req, res, next) => {
@@ -372,7 +367,7 @@ exports.addToWishlist = async (req, res, next) => {
     let itemDiscount = product.itemDiscount;
     const hasDiscount = product.itemDiscount === 0 ? false : true;
     if (hasDiscount) {
-      itemPrice = Math.round(itemPrice - itemPrice * (itemDiscount / 100));
+      itemPrice = product.discountedPrice;
     }
     const item = wishlist.items.find(
       (item) =>
@@ -627,9 +622,7 @@ exports.getWishlist = async (req, res, next) => {
       );
       let itemPrice = product.itemPrice;
       if (product.itemDiscount > 0) {
-        itemPrice = Math.round(
-          itemPrice - itemPrice * (product.itemDiscount / 100)
-        );
+        itemPrice = product.discountedPrice;
       }
       const img = idx !== -1 ? product.itemAvailableImages[6 * idx] : null;
       return {
@@ -677,9 +670,7 @@ exports.getCart = async (req, res, next) => {
       );
       let itemPrice = product.itemPrice;
       if (product.itemDiscount > 0) {
-        itemPrice = Math.round(
-          itemPrice - itemPrice * (product.itemDiscount / 100)
-        );
+        itemPrice = product.discountedPrice;
       }
       const price = itemPrice * item.quantity;
       totalPrice += price;
@@ -697,6 +688,150 @@ exports.getCart = async (req, res, next) => {
     res.status(200).json({
       ok: true,
       cart: { items: cartItems, totalPrice },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.postOrder = async (req, res, next) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    const cart = await Cart.findOne({ userId });
+    if (!cart)
+      throw handleError({
+        message: "Cart not found",
+        statusCode: 404,
+        notAvailableProductIds,
+        ok: false,
+      });
+    const items = cart.items;
+    const productIds = items.map((item) => item.productId);
+    const orderedProducts = await Product.find({ _id: { $in: productIds } });
+    const availableProductIds = new Set(
+      orderedProducts.map((product) => product._id.toString())
+    );
+    const notAvailableProductIds = productIds.filter(
+      (productId) => !availableProductIds.has(productId.toString())
+    );
+    if (notAvailableProductIds.length > 0)
+      throw handleError({
+        message: "One or more ordered products are not available",
+        statusCode: 404,
+        notAvailableProductIds,
+        ok: false,
+      });
+    const orderedItems = items
+      .filter((item) => availableProductIds.has(item.productId.toString()))
+      .map((item) => ({
+        productId: item.productId,
+        size: item.size,
+        color: item.color,
+        quantity: item.quantity,
+      }));
+    const order = new Order({ userId, items: orderedItems });
+    const savedOrder = await order.save();
+    if (!savedOrder)
+      throw handleError({
+        message: "Error occurred while saving order",
+        statusCode: 500,
+        ok: false,
+      });
+    await Cart.deleteOne({ userId });
+    res.status(201).json({
+      message: "Order created successfully",
+      ok: true,
+      cartLength: 0,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getOrders = async (req, res, next) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+
+    const allItems = orders.map((order) => order.items).flat();
+    const productIds = allItems.map(
+      (item) => new mongoose.Types.ObjectId(item.productId)
+    );
+    const products = await Product.find({ _id: { $in: productIds } });
+    const productIdNameMap = new Map();
+    const productIdPriceMap = new Map();
+
+    products.forEach((product) => {
+      let itemPrice = product.itemPrice;
+      if (product.itemDiscount > 0) {
+        itemPrice = product.discountedPrice;
+      }
+      productIdNameMap.set(product._id.toString(), product.itemName);
+      productIdPriceMap.set(product._id.toString(), itemPrice);
+    });
+
+    let count = 0;
+
+    const structuredOrders = orders.map((order) => {
+      let total = 0;
+      const children = order.items.map((item, idx) => {
+        total +=
+          item.quantity * productIdPriceMap.get(item.productId.toString());
+        count++;
+        return {
+          id: String(idx) + count,
+          label:
+            productIdNameMap.get(item.productId.toString()) +
+            ", COLOR : " +
+            item.color +
+            ", QUANTITY : " +
+            item.quantity +
+            (item.size ? ", SIZE : " + item.size : ""),
+        };
+      });
+      const formattedDate = new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(order.createdAt));
+      const formattedTotal = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: 0,
+      }).format(total);
+      return {
+        children,
+        id: order._id,
+        label:
+          "ORDER ID : " +
+          order.id +
+          ", ORDERED DATE : " +
+          formattedDate +
+          ", TOTAL : " +
+          formattedTotal,
+      };
+    });
+
+    res.status(200).json({
+      ok: true,
+      structuredOrders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getUserProperties = async (req, res, next) => {
+  try {
+    console.log(req.userId);
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    const cart = await Cart.findOne({ userId });
+    const wishlist = await Wishlist.findOne({ userId });
+    const cartCount = cart ? cart.items.length : 0;
+    const wishlistCount = wishlist ? wishlist.items.length : 0;
+    res.status(200).json({
+      cartCount,
+      wishlistCount,
     });
   } catch (error) {
     next(error);

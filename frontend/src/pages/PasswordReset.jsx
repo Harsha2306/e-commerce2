@@ -24,7 +24,7 @@ const validatePassword = (password, cb) => {
 };
 
 const PasswordReset = () => {
-  useIsLoggedIn();
+   useIsLoggedIn();
   const { token } = useParams();
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
