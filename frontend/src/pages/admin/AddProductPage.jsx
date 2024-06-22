@@ -1,21 +1,16 @@
 import { useState, useEffect } from "react";
-import { Grid, TextField } from "@mui/material";
-import { Typography } from "@mui/joy";
-import Textarea from "@mui/joy/Textarea";
+import { Grid, TextField, CircularProgress, Checkbox } from "@mui/material";
 import useInput from "./customHooks/useInput";
 import AdminNavBar from "../../components/admin/AdminNavBar";
-import Select from "@mui/joy/Select";
-import Option from "@mui/joy/Option";
-import { Box, Chip } from "@mui/joy";
+import { Box, Chip, Alert, Select, Option, Textarea, Typography } from "@mui/joy";
 import { v4 as uuidv4 } from "uuid";
 import StyledButton from "../../components/StyledButton";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import Alert from "@mui/joy/Alert";
 import {
   useGetProductByIdQuery,
   usePostAddProductMutation,
 } from "../../api/AdminApi";
-import CircularProgress from "@mui/material/CircularProgress";
+import useIsAdminLoggedIn from "./customHooks/useIsAdminLoggedIn";
 
 const INVALID_PRODUCT_ID =
   "input must be a 24 character hex string, 12 byte Uint8Array, or an integer";
@@ -84,6 +79,7 @@ const validateImages = (ip, pattern, setInputError, errMsg) => {
 };
 
 const AddProductPage = () => {
+  useIsAdminLoggedIn();
   const [searchParams] = useSearchParams();
   const [
     itemName,
@@ -167,6 +163,7 @@ const AddProductPage = () => {
   const [itemAvailableSizes, setAvailableSizes] = useState([]);
   const [itemCategory, setCategory] = useState("Shoes");
   const [itemGender, setGender] = useState("Men");
+  const [available, setAvailable] = useState(false);
   const [availableSizesC, setAvailableSizesC] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [postAddProduct] = usePostAddProductMutation();
@@ -176,7 +173,6 @@ const AddProductPage = () => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log(error);
     if (!isLoading) {
       if (!isError && data) {
         const { product, colors, imgs } = data;
@@ -189,6 +185,7 @@ const AddProductPage = () => {
           setCategory(product.itemCategory);
           setGender(product.itemGender);
           setItemAvailableColors(colors);
+          setAvailable(product.available);
           itemCategory === "Shoes"
             ? setAvailableSizes(product.itemAvailableSizes)
             : setAvailableSizesC(product.itemAvailableSizes);
@@ -300,6 +297,7 @@ const AddProductPage = () => {
         itemAvailableSizes.length !== 0 ? itemAvailableSizes : availableSizesC,
       itemAvailableColors,
       itemAvailableImages,
+      available,
     });
     if (res.error && res.error.data && res.error.data.errorFields) {
       res.error.data.errorFields.map((err) => {
@@ -711,6 +709,19 @@ const AddProductPage = () => {
               {itemImagesErrorMessage}
             </Typography>
           )}
+        </Grid>
+        <Grid container mx={30} mb={3} item xs={12}>
+          <Grid xs={12} item>
+            <Typography paddingY={0.5} level="title-sm">
+              IN STOCK<Typography color="danger">*</Typography>
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Checkbox
+              checked={available}
+              onChange={() => setAvailable(!available)}
+            />
+          </Grid>
         </Grid>
         <Grid container mx={30} mb={3} item xs={12}>
           <StyledButton

@@ -1,8 +1,7 @@
 import { Grid } from "@mui/material";
-import { Typography, Divider } from "@mui/joy";
+import { Typography, Divider, CircularProgress } from "@mui/joy";
 import WishlistItem from "../components/WishListItem";
 import { useGetWishlistQuery } from "../api/UserApi";
-import CircularProgress from "@mui/joy/CircularProgress";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
@@ -17,7 +16,7 @@ const WishlistPage = () => {
   const location = useLocation();
   const [show, setShow] = useState(false);
 
-  console.log(error);
+  console.log(data);
 
   useEffect(() => {
     if (!isError && !isLoading && data) {
@@ -92,6 +91,7 @@ const WishlistPage = () => {
                   productId={product.productId}
                   refetch={refetch}
                   length={wishlist.length}
+                  available={product.available}
                 />
               ))}
             </Grid>

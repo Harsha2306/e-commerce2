@@ -1,13 +1,18 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
-import { Grid, IconButton, Box } from "@mui/material";
+import {
+  Grid,
+  IconButton,
+  Box,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+} from "@mui/material";
 import StyledButton from "./StyledButton";
 import { CircularProgress, Typography } from "@mui/joy";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -29,7 +34,9 @@ const CartItem = ({
   img,
   refetch,
   productId,
+  available,
 }) => {
+  console.log(available);
   const [open, setOpen] = useState(false);
   const formattedPrice = useFormattedPrice(price);
   const navigateTo = useNavigate();
@@ -120,6 +127,28 @@ const CartItem = ({
             {formattedPrice}
           </Typography>
         </Typography>
+        <Grid item>
+          {available && (
+            <Chip
+              sx={{
+                fontWeight: "700",
+              }}
+              label="IN STOCK"
+              color="success"
+              variant="outlined"
+            />
+          )}
+          {!available && (
+            <Chip
+              sx={{
+                fontWeight: "700",
+              }}
+              label="OUT OF STOCK"
+              color="error"
+              variant="outlined"
+            />
+          )}
+        </Grid>
         <Grid mb={1} columnSpacing={1} container>
           <Grid display="flex" alignItems="center" item>
             <DeleteOutlineIcon
@@ -158,9 +187,15 @@ const CartItem = ({
                     <Typography mb={2} level="body-sm">
                       {color}
                     </Typography>
-                    <Typography level="body-md" mb={1} sx={{ color: "black" }}>
-                      SIZE: <Typography level="body-sm">{size}</Typography>
-                    </Typography>
+                    {size && (
+                      <Typography
+                        level="body-md"
+                        mb={1}
+                        sx={{ color: "black" }}
+                      >
+                        SIZE: <Typography level="body-sm">{size}</Typography>
+                      </Typography>
+                    )}
                     <Typography mb={1} level="body-md" sx={{ color: "black" }}>
                       PRICE:
                       <Typography level="body-sm">{formattedPrice}</Typography>
@@ -197,24 +232,6 @@ const CartItem = ({
               </DialogActions>
             </Dialog>
           </Grid>
-          {/* <Grid display="flex" alignItems="center" item>
-            <Chip
-              sx={{
-                fontWeight: "700",
-              }}
-              label="IN STOCK"
-              color="success"
-              variant="outlined"
-            />
-            <Chip
-              sx={{
-                fontWeight: "700",
-              }}
-              label="OUT OF STOCK"
-              color="error"
-              variant="outlined"
-            />
-          </Grid> */}
           <Grid item>
             <Box display="flex" alignItems="center">
               {isRemoving ? (

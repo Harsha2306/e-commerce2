@@ -2,8 +2,7 @@ import { List, ListItem, ListItemText, Grid } from "@mui/material";
 import { Typography } from "@mui/joy";
 import StyledButton from "../components/StyledButton";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { setToken, setLogin } from "../redux-store/TokenSlice";
 import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
 

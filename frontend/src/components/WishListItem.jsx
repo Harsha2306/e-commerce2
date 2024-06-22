@@ -26,7 +26,9 @@ const WishListItem = ({
   refetch,
   _id,
   productId,
+  available,
 }) => {
+  console.log(available);
   const [open, setOpen] = useState(false);
   const [removeFromWishlist, { isLoading: isRemoving }] =
     useRemoveFromWishlistMutation();
@@ -143,9 +145,15 @@ const WishListItem = ({
                     <Typography mb={2} level="body-sm">
                       {color}
                     </Typography>
-                    <Typography level="body-md" mb={1} sx={{ color: "black" }}>
-                      SIZE: <Typography level="body-sm">{size}</Typography>
-                    </Typography>
+                    {size && (
+                      <Typography
+                        level="body-md"
+                        mb={1}
+                        sx={{ color: "black" }}
+                      >
+                        SIZE: <Typography level="body-sm">{size}</Typography>
+                      </Typography>
+                    )}
                     <Typography mb={1} level="body-md" sx={{ color: "black" }}>
                       PRICE:
                       <Typography level="body-sm">{formattedPrice}</Typography>
@@ -181,22 +189,26 @@ const WishListItem = ({
             </Dialog>
           </Grid>
           <Grid item>
-            <Chip
-              sx={{
-                fontWeight: "700",
-              }}
-              label="IN STOCK"
-              color="success"
-              variant="outlined"
-            />
-            <Chip
-              sx={{
-                fontWeight: "700",
-              }}
-              label="OUT OF STOCK"
-              color="error"
-              variant="outlined"
-            />
+            {available && (
+              <Chip
+                sx={{
+                  fontWeight: "700",
+                }}
+                label="IN STOCK"
+                color="success"
+                variant="outlined"
+              />
+            )}
+            {!available && (
+              <Chip
+                sx={{
+                  fontWeight: "700",
+                }}
+                label="OUT OF STOCK"
+                color="error"
+                variant="outlined"
+              />
+            )}
           </Grid>
         </Grid>
         <StyledButton

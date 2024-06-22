@@ -105,6 +105,10 @@ export const userApi = createApi({
         method: "post",
       }),
     }),
+    getOrderDetails: builder.query({
+      query: (queryParams) =>
+        `orderDetails?${new URLSearchParams(queryParams).toString()}`,
+    }),
     getUserProperties: builder.query({
       query: () => "/user",
     }),
@@ -130,5 +134,6 @@ export const {
   useForgotPasswordMutation,
   useResetForgottenPasswordMutation,
   usePostOrderMutation,
-  useGetUserPropertiesQuery
+  useGetUserPropertiesQuery,
+  useGetOrderDetailsQuery,
 } = userApi;

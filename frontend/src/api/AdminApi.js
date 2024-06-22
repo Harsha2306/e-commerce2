@@ -29,6 +29,7 @@ export const adminApi = createApi({
         itemAvailableSizes,
         itemAvailableColors,
         itemAvailableImages,
+        available
       }) => ({
         url: "/add-product",
         method: "post",
@@ -44,6 +45,7 @@ export const adminApi = createApi({
           itemAvailableSizes,
           itemAvailableColors,
           itemAvailableImages,
+          available
         },
       }),
     }),

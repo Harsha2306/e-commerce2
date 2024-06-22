@@ -1,12 +1,15 @@
 /* eslint-disable react/prop-types */
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import { Typography, Divider } from "@mui/joy";
-import { Grid, Button } from "@mui/material";
+import {
+  Grid,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const DeleteDialog = ({ itemName, handleClose, open }) => {
+const DeleteDialog = ({ itemName, handleClose, open, available }) => {
   const onButtonClick = () => {};
   return (
     <>
@@ -25,7 +28,8 @@ const DeleteDialog = ({ itemName, handleClose, open }) => {
           <Grid container>
             <Grid xs={10} item>
               <Typography level="h3">
-                Are you sure you want to delete
+                Are you sure you want to make
+                {available ? " Unavailable" : " Available"}
               </Typography>
             </Grid>
             <Grid xs item display="flex" justifyContent="flex-end">

@@ -95,6 +95,7 @@ exports.postProduct = async (req, res, next) => {
       itemAvailableSizes,
       itemAvailableColors,
       itemAvailableImages,
+      available,
     } = req.body;
     const itemColors = itemAvailableColors.split(",");
     const itemImages = itemAvailableImages.split("|");
@@ -129,6 +130,7 @@ exports.postProduct = async (req, res, next) => {
       productToUpdate.itemAvailableSizes = itemAvailableSizes;
       productToUpdate.itemAvailableColors = itemColors;
       productToUpdate.itemAvailableImages = itemImages;
+      productToUpdate.available = available;
       const updatedProduct = await productToUpdate.save();
       if (!updatedProduct)
         throw handleError({
@@ -148,6 +150,7 @@ exports.postProduct = async (req, res, next) => {
         itemAvailableSizes,
         itemAvailableColors: itemColors,
         itemAvailableImages: itemImages,
+        available,
       });
       const savedProduct = await newProduct.save();
       if (!savedProduct) {

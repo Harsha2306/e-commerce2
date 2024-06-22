@@ -1,17 +1,22 @@
 import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import Slide from "@mui/material/Slide";
-import { Grid, TextField, Dialog, Divider } from "@mui/material";
+import {
+  Grid,
+  TextField,
+  Dialog,
+  Divider,
+  Slide,
+  List,
+  ListItem,
+  ListItemText,
+  CircularProgress,
+} from "@mui/material";
 import { Typography } from "@mui/joy";
 import SearchProduct from "./SearchProduct";
 import SearchIcon from "@mui/icons-material/Search";
 import { useState, useEffect } from "react";
 import { useGetSearchedProductsQuery } from "../api/UserApi";
-import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate } from "react-router-dom";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
 const Transition = React.forwardRef(function Transition(props, ref) {

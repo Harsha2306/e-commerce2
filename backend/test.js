@@ -31,3 +31,34 @@ async function updateDiscountedPrice() {
     }
 
 }
+
+const updateProducts = async () => {
+  try {
+    // Connect to your MongoDB database
+    await mongoose.connect(dbURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    console.log("Connected to MongoDB");
+
+    // Update all existing products to set available to true if it's not set
+    await Product.updateMany(
+      { available: { $exists: false } },
+      { $set: { available: true } }
+    );
+
+    console.log(
+      "All existing products updated to include 'available' field set to true"
+    );
+
+    // Close the database connection
+    await mongoose.connection.close();
+    console.log("Database connection closed");
+  } catch (error) {
+    console.error("Error updating products:", error);
+    process.exit(1);
+  }
+};
+
+updateProducts();

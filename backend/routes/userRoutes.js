@@ -46,5 +46,6 @@ router.get("/cart", isAuthorized, userController.getCart);
 router.post("/newOrder", isAuthorized, userController.postOrder);
 router.get("/orders", isAuthorized, userController.getOrders);
 router.get("/user", isAuthorized, userController.getUserProperties);
+router.get("/orderDetails", isAuthorized, userController.getOrderDetails);
 
 module.exports = router;

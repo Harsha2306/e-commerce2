@@ -3,13 +3,11 @@ import { useEffect, useState } from "react";
 import FilterAndSort from "../components/FilterAndSort";
 import { Grid, Typography } from "@mui/material";
 import { Breadcrumbs, Divider } from "@mui/joy";
-import { Link } from "react-router-dom";
 import Product from "../components/Product";
 import { useGetProductsQuery } from "../api/UserApi";
 import ProductSkeleton from "../components/ProductSkeleton";
 import Pagination from "../components/Pagination";
-import { useNavigate } from "react-router-dom";
-import Footer from "./Footer";
+import { useNavigate, Link } from "react-router-dom";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const ProductsPage = ({ gender }) => {

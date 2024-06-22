@@ -1,32 +1,29 @@
 import { createContext, useState, useEffect } from "react";
-import { Grid, Typography } from "@mui/material";
+import { Grid, Typography, CircularProgress } from "@mui/material";
 import Size from "./Size";
 import StyledButton from "./StyledButton";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ProductColorImage from "./ProductColorImage";
 import ImgContainer from "./ImgContainer";
-import Breadcrumbs from "@mui/joy/Breadcrumbs";
+import { Breadcrumbs } from "@mui/joy";
 import { Link, useParams } from "react-router-dom";
 import ProductCarousel from "./ProductCarousel";
 import MiniDialog from "./MiniDialog";
-import CircularProgress from "@mui/material/CircularProgress";
 import {
   useAddToCartMutation,
   useGetProductByIdQuery,
   useAddToWishlistMutation,
   useGetCheckIfProductPresentInWishlistAndCartQuery,
 } from "../api/UserApi";
-import { useNavigate } from "react-router-dom";
 import CircularProgressJ from "@mui/joy/CircularProgress";
 import SessionExpiredAlert from "./SessionExpiredAlert";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import { setCartCount } from "../redux-store/userSlice";
-import { useDispatch } from "react-redux";
 import useGetPrice from "../hooks/useGetPrice";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import { setWishlistCount } from "../redux-store/userSlice";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 export const SizeContext = createContext();
@@ -47,7 +44,7 @@ const colorValueStyles = {
 };
 
 const ProductDetails = () => {
-  useIsLoggedIn()
+  useIsLoggedIn();
   const isLoggedIn = useSelector((state) => state.token.isLoggedIn);
   const { productId } = useParams();
   const [searchParams] = useSearchParams();

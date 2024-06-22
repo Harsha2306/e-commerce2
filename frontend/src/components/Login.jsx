@@ -1,12 +1,10 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Grid, TextField } from "@mui/material";
-import { Typography } from "@mui/joy";
+import { Typography, CircularProgress } from "@mui/joy";
 import StyledButton from "../components/StyledButton";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { usePostLoginMutation } from "../api/AuthApi";
-import { useNavigate } from "react-router-dom";
-import CircularProgress from "@mui/joy/CircularProgress";
 import { useDispatch } from "react-redux";
 import { setToken, setLogin, setIsAdmin } from "../redux-store/TokenSlice";
 import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
@@ -46,6 +44,7 @@ const Login = ({ isAdmin }) => {
   const [emailError, setEmailError] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoginButtonDisabled, setIsLoginButtonDisabled] = useState(true);
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -53,12 +52,18 @@ const Login = ({ isAdmin }) => {
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
 
-  const isLoginButtonDisabled = !(
-    !emailError &&
-    !passwordError &&
-    email.trim().length !== 0 &&
-    password.trim().length !== 0
+  useEffect(
+    () =>
+      setIsLoginButtonDisabled(
+        emailError ||
+          passwordError ||
+          email.trim().length === 0 ||
+          password.trim().length === 0
+      ),
+    [email, emailError, password, passwordError]
   );
+
+  console.log(isLoginButtonDisabled);
 
   const emailChangeHandler = (e) => {
     setEmail(e.target.value);
@@ -71,7 +76,7 @@ const Login = ({ isAdmin }) => {
   };
 
   const login = async () => {
-    localStorage.removeItem("token")
+    localStorage.removeItem("token");
     dispatch(setToken(undefined));
     setIsLoading(true);
     const res = await postLogin({ email, password });
@@ -87,7 +92,7 @@ const Login = ({ isAdmin }) => {
         }
       });
     }
-    console.log(res.data)
+    console.log(res.data);
     if (res.data && res.data.ok) {
       localStorage.setItem("token", res.data.token);
       dispatch(setToken(res.data.token));
@@ -97,7 +102,7 @@ const Login = ({ isAdmin }) => {
         dispatch(setWishlistCount(res.data.wishlistCount));
         navigateTo("/");
       } else {
-        console.log("Admin logged in")
+        console.log("Admin logged in");
         dispatch(setIsAdmin(true));
         navigateTo("/admin");
       }
@@ -207,14 +212,12 @@ const Login = ({ isAdmin }) => {
           disabled={isLoginButtonDisabled}
           text={!isLoading && "Login"}
           height="50px"
-          color={isLoginButtonDisabled ? "rgb(59 64 71)" : "white"}
-          backgroundColor={isLoginButtonDisabled ? "rgb(189 193 197)" : "black"}
+          color={"white"}
+          backgroundColor={"black"}
           width="100%"
           hoverStyles={{
-            color: isLoginButtonDisabled ? "rgb(59 64 71)" : "white",
-            backgroundColor: isLoginButtonDisabled
-              ? "rgb(189 193 197)"
-              : "black",
+            color: "white",
+            backgroundColor: "black",
           }}
         />
       </Grid>

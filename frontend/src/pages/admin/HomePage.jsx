@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, CircularProgress } from "@mui/material";
 import AdminNavBar from "../../components/admin/AdminNavBar";
 import { useGetProductsQuery } from "../../api/AdminApi";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -6,9 +6,10 @@ import StyledButton from "../../components/StyledButton";
 import { useState, useEffect } from "react";
 import AdminProduct from "../../components/admin/AdminProduct";
 import Product from "../../components/Product";
-import CircularProgress from "@mui/material/CircularProgress";
+import useIsAdminLoggedIn from "./customHooks/useIsAdminLoggedIn";
 
 const HomePage = () => {
+  useIsAdminLoggedIn();
   const { data, isLoading, isError, error, refetch } = useGetProductsQuery();
   const [products, setProducts] = useState([]);
   const navigateTo = useNavigate();
@@ -17,7 +18,6 @@ const HomePage = () => {
   useEffect(() => {
     if (!isLoading) {
       if (isError) {
-        console.log(error);
         if (error?.data?.message === "Not Authorized") {
           navigateTo("/admin/login");
         }

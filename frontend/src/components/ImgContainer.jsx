@@ -1,6 +1,5 @@
-import React from "react";
-import { Grid } from "@mui/material";
-import Skeleton from "@mui/material/Skeleton";
+/* eslint-disable react/prop-types */
+import { Grid, Skeleton } from "@mui/material";
 
 const ImgContainer = ({ left, right, isLoading }) => {
   return (
@@ -8,10 +7,10 @@ const ImgContainer = ({ left, right, isLoading }) => {
       item
       display="flex"
       padding={1}
-      justifyContent="space-around"
+      justifyContent="center"
       container
     >
-      <Grid item sx={{ height: "330px", width: "360px" }}>
+      <Grid item sx={{ height: "330px", width: "360px" }} mr={3}>
         {isLoading ? (
           <Skeleton variant="rectangular" width="100%" height="100%" />
         ) : (
@@ -22,7 +21,7 @@ const ImgContainer = ({ left, right, isLoading }) => {
           />
         )}
       </Grid>
-      <Grid item sx={{ height: "330px", width: "360px" }}>
+      <Grid item sx={{ height: "330px", width: "360px" }} ml={2}>
         {isLoading ? (
           <Skeleton variant="rectangular" width="100%" height="100%" />
         ) : (

@@ -1,10 +1,9 @@
-import { Grid } from "@mui/material";
-import { Typography, Divider } from "@mui/joy";
+import { Grid, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { Typography, Divider, CircularProgress } from "@mui/joy";
 import CartItem from "../components/CartItem";
 import StyledButton from "../components/StyledButton";
 import { useGetCartQuery, usePostOrderMutation } from "../api/UserApi";
 import { useState, useEffect } from "react";
-import CircularProgress from "@mui/joy/CircularProgress";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -13,7 +12,7 @@ import { setCartCount } from "../redux-store/userSlice";
 import { useDispatch } from "react-redux";
 
 const CartPage = () => {
-   useIsLoggedIn();
+  useIsLoggedIn();
   const { data, error, isLoading, isError, refetch } = useGetCartQuery();
   const [cart, setCart] = useState([]);
   const [empty, setEmpty] = useState(false);
@@ -21,6 +20,7 @@ const CartPage = () => {
   const formattedPrice = useFormattedPrice(totalPrice);
   const location = useLocation();
   const [show, setShow] = useState(false);
+  const [showFinal, setShowFinal] = useState(false);
   const navigateTo = useNavigate();
   const [postOrder, { isLoading: isAdding, isError: errorWhileOrdering }] =
     usePostOrderMutation();
@@ -60,6 +60,11 @@ const CartPage = () => {
     }
   };
 
+  const canPlaceOrder =
+    data?.cart?.items?.reduce((accumulator, item) => {
+      return item.available ? accumulator + 1 : accumulator;
+    }, 0) || 0;
+
   if (isLoading) {
     return (
       <Grid paddingY={10} display="flex" justifyContent="center">
@@ -95,13 +100,6 @@ const CartPage = () => {
             <Grid item my={3} xs={12}>
               <Typography level="h2" sx={{ fontWeight: "350" }}>
                 MY SHOPPING CART
-                <Typography
-                  level="title-lg"
-                  ml={1}
-                  sx={{ color: "rgb(108 108 108)", fontSize: "30px" }}
-                >
-                  ({cart.length})
-                </Typography>
               </Typography>
             </Grid>
             <Grid xs={12} container item>
@@ -118,12 +116,16 @@ const CartPage = () => {
                     img={item.img}
                     refetch={refetch}
                     productId={item.productId}
+                    available={item.available}
                   />
                 ))}
               </Grid>
               <Grid xs ml={5} container direction="column" item>
                 <Grid item paddingY={2}>
                   <Typography level="h4">ORDER SUMMARY</Typography>
+                  <Typography level="body-md">
+                    Only In stock products
+                  </Typography>
                 </Grid>
                 <Grid mb={1} item container>
                   <Grid xs={6} display="flex" justifyContent="flex-start" item>
@@ -131,7 +133,7 @@ const CartPage = () => {
                       level="body-lg"
                       sx={{ color: "rgb(108 108 108)" }}
                     >
-                      {cart.length} {cart.length === 1 ? "Item" : "Items"}
+                      {data?.inStock} {data?.inStock === 1 ? "Item" : "Items"}
                     </Typography>
                   </Grid>
                   <Grid xs={6} display="flex" justifyContent="flex-end" item>
@@ -172,7 +174,7 @@ const CartPage = () => {
                 </Grid>
                 <Grid item>
                   <StyledButton
-                    onClick={checkOut}
+                    onClick={() => setShowFinal(true)}
                     text="Check Out"
                     height="40px"
                     color="white"
@@ -189,6 +191,45 @@ const CartPage = () => {
           </>
         )}
       </Grid>
+      <Dialog
+        open={showFinal}
+        onClose={() => setShowFinal(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title" sx={{ textAlign: "center" }}>
+          {canPlaceOrder > 0
+            ? "Orders will only be placed for items currently in stock."
+            : "All items in the cart are out of stock."}
+        </DialogTitle>
+        <DialogContent>
+          <Grid container></Grid>
+        </DialogContent>
+        <DialogActions>
+          {canPlaceOrder > 0 && (
+            <StyledButton
+              variant="contained"
+              width="50%"
+              height="40px"
+              color="white"
+              backgroundColor="black"
+              hoverStyles={{ color: "white", backgroundColor: "black" }}
+              text="Confirm"
+              onClick={checkOut}
+            />
+          )}
+          <StyledButton
+            variant="contained"
+            width={canPlaceOrder > 0 ? "50%" : "100%"}
+            height="40px"
+            color="white"
+            backgroundColor="black"
+            hoverStyles={{ color: "white", backgroundColor: "black" }}
+            text={canPlaceOrder > 0 ? "Cancel" : "Ok"}
+            onClick={() => setShowFinal(false)}
+          />
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

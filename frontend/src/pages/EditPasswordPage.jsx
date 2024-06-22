@@ -1,12 +1,9 @@
 import { Grid, TextField } from "@mui/material";
-import { Typography, Breadcrumbs } from "@mui/joy";
-import { Link } from "react-router-dom";
+import { Typography, Breadcrumbs, CircularProgress, Alert } from "@mui/joy";
+import { Link, useNavigate } from "react-router-dom";
 import StyledButton from "../components/StyledButton";
-import { useNavigate } from "react-router-dom";
 import { useChangePasswordMutation } from "../api/UserApi";
 import { useReducer, useState } from "react";
-import CircularProgress from "@mui/joy/CircularProgress";
-import Alert from "@mui/joy/Alert";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const reducer = (state, action) => {

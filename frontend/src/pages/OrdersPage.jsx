@@ -1,44 +1,18 @@
 import { useEffect, useState } from "react";
-import { Grid } from "@mui/material";
-import { Typography } from "@mui/joy";
+import {
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@mui/material";
+import { Typography, Breadcrumbs, CircularProgress } from "@mui/joy";
 import { useGetOrdersQuery } from "../api/UserApi";
-import CircularProgress from "@mui/joy/CircularProgress";
 import { useNavigate, useLocation } from "react-router-dom";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
-import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
-import { TreeItem, treeItemClasses } from "@mui/x-tree-view/TreeItem";
-import { styled, alpha } from "@mui/material/styles";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
-
-const CustomTreeItem = styled(TreeItem)(({ theme }) => ({
-  color:
-    theme.palette.mode === "light"
-      ? theme.palette.grey[800]
-      : theme.palette.grey[200],
-  [`& .${treeItemClasses.content}`]: {
-    borderRadius: theme.spacing(0.5),
-    padding: theme.spacing(0.5, 1),
-    margin: theme.spacing(0.2, 0),
-    [`& .${treeItemClasses.label}`]: {
-      fontSize: "1rem",
-      fontWeight: 500,
-    },
-  },
-  [`& .${treeItemClasses.iconContainer}`]: {
-    borderRadius: "50%",
-    backgroundColor:
-      theme.palette.mode === "light"
-        ? alpha(theme.palette.primary.main, 0.25)
-        : theme.palette.primary.dark,
-    color: theme.palette.mode === "dark" && theme.palette.primary.contrastText,
-    padding: theme.spacing(0, 1.2),
-  },
-  [`& .${treeItemClasses.groupTransition}`]: {
-    marginLeft: 15,
-    paddingLeft: 18,
-    borderLeft: `1px dashed ${alpha(theme.palette.text.primary, 0.4)}`,
-  },
-}));
+import { Link } from "react-router-dom";
 
 const OrdersPage = () => {
   useIsLoggedIn();
@@ -50,7 +24,6 @@ const OrdersPage = () => {
 
   useEffect(() => {
     if (isError) {
-      console.log(isError, error);
       if (error.data.message === "Not Authorized") navigateTo("/login");
       else if (error.data.message === "jwt expired") {
         setShow(true);
@@ -58,8 +31,7 @@ const OrdersPage = () => {
       }
     }
     if (data && data.ok) {
-      setOrders(data.structuredOrders);
-      console.log(data);
+      setOrders(data.orders);
     }
   }, [isError, error, navigateTo, data]);
 
@@ -83,27 +55,58 @@ const OrdersPage = () => {
 
   return (
     <>
-      {!isError && orders.length === 0 && (
+      {!isError && orders && orders.length === 0 && (
         <Grid display="flex" alignItems="center" justifyContent="center">
           <Typography mt={10} level="h2">
             NO ORDERS YET
           </Typography>
         </Grid>
       )}
-      {!isError && orders.length !== 0 && (
-        <Grid container>
-          <Grid mt={5} item xs={12}>
+      {!isError && orders && orders.length !== 0 && (
+        <Grid mt={13} paddingX={6} container>
+          <Breadcrumbs sx={{ paddingX: "0px" }}>
+            <Link style={{ color: "blue" }} to="/">
+              <Typography variant="body1" sx={{ color: "blue" }}>
+                Home
+              </Typography>
+            </Link>
+            <Typography variant="body1">Orders</Typography>
+          </Breadcrumbs>
+          <Grid item xs={12}>
             <Typography display="flex" justifyContent="center" level="h2">
               YOUR ORDERS
             </Typography>
           </Grid>
-          <Grid item xs={12} display="flex" justifyContent="center">
-            <RichTreeView
-              defaultExpandedItems={["grid"]}
-              slots={{ item: CustomTreeItem }}
-              sx={{ width: "100%", marginTop: "30px" }}
-              items={orders}
-            />
+          <Grid display="flex" justifyContent="center" item xs={12}>
+            <Table sx={{ width: 600 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Order ID</TableCell>
+                  <TableCell align="center">Ordered At</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {orders.map((row) => (
+                  <TableRow
+                    key={row.orderId}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell
+                      sx={{
+                        "&:hover": { cursor: "pointer" },
+                      }}
+                      component="th"
+                      scope="row"
+                    >
+                      <Link to={"/orderDetails/" + row.orderId}>
+                        {row.orderId}
+                      </Link>
+                    </TableCell>
+                    <TableCell align="right">{row.orderedAt}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Grid>
         </Grid>
       )}

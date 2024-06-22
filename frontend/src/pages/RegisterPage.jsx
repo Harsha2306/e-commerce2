@@ -1,12 +1,9 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Grid, TextField } from "@mui/material";
-import { Typography } from "@mui/joy";
+import { Typography, CircularProgress } from "@mui/joy";
 import StyledButton from "../components/StyledButton";
-import Footer from "../components/Footer";
-import { Link } from "react-router-dom";
 import { usePostRegisterMutation } from "../api/AuthApi";
-import { useNavigate } from "react-router-dom";
-import CircularProgress from "@mui/joy/CircularProgress";
+import { useNavigate, Link } from "react-router-dom";
 
 const RegisterPage = () => {
   const [firstName, setFirstName] = useState("");

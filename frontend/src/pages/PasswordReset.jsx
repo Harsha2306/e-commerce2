@@ -1,7 +1,6 @@
 import { Grid, TextField } from "@mui/material";
-import { Typography } from "@mui/joy";
+import { Typography , CircularProgress} from "@mui/joy";
 import { useState } from "react";
-import CircularProgress from "@mui/joy/CircularProgress";
 import StyledButton from "../components/StyledButton";
 import { useParams } from "react-router-dom";
 import { useResetForgottenPasswordMutation } from "../api/UserApi";

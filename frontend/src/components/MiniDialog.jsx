@@ -1,9 +1,6 @@
 /* eslint-disable react/prop-types */
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
+import { Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
 import { Typography, Divider } from "@mui/joy";
-import { Grid } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import StyledButton from "./StyledButton";
 import { useNavigate } from "react-router-dom";

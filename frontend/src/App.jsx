@@ -20,6 +20,7 @@ import PasswordReset from "./pages/PasswordReset";
 import AdminNavBar from "./components/admin/AdminNavBar";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import PageNotFound from "./pages/PageNotFound";
+import OrderDetails from "./pages/OrderDetails";
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
       { path: "/cart", element: <CartPage /> },
       { path: "/order-history", element: <OrdersPage /> },
       { path: "/forgotPassword", element: <ForgotPassword /> },
+      { path: "/orderDetails/:orderId", element: <OrderDetails /> },
     ],
   },
   { path: "/reset/:token", element: <PasswordReset /> },

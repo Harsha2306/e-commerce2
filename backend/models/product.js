@@ -14,6 +14,7 @@ const productSchema = new Schema(
     itemAvailableColors: [{ type: String, required: true }],
     itemAvailableImages: [{ type: String, required: true }],
     discountedPrice: { type: Number },
+    available: { type: Boolean, default: true },
   },
   {
     timestamps: true,
@@ -27,5 +28,10 @@ productSchema.methods.getDiscountedPrice = function () {
   }
   return this.itemPrice;
 };
+
+productSchema.pre("save", function (next) {
+  this.discountedPrice = this.getDiscountedPrice();
+  next();
+});
 
 module.exports = mongoose.model("product", productSchema);

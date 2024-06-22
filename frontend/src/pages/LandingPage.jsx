@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import { useEffect } from "react";
-import { Typography } from "@mui/joy";
+import { Typography , CircularProgress} from "@mui/joy";
 import ProductCarousel from "../components/ProductCarousel";
 import Panel from "../components/Panel";
 import EnhancedEncryptionOutlinedIcon from "@mui/icons-material/EnhancedEncryptionOutlined";
@@ -10,7 +10,6 @@ import ImageContainer from "../components/ImageContainer";
 import Footer from "../components/Footer";
 import { useGetRecommendedAndNewArrivalsQuery } from "../api/UserApi";
 import { useLocation } from "react-router-dom";
-import CircularProgress from "@mui/joy/CircularProgress";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
 
 const LandingPage = () => {

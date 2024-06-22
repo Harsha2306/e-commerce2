@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Grid } from "@mui/material";
 import StyledButton from "./StyledButton";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +33,7 @@ const ImageContainer = ({ imgLink, navigationLink }) => {
         <StyledButton
           onClick={onButtonClick}
           text="shop now"
-          height="40px"
+          height="50px"
           color="white"
           backgroundColor="black"
           width="150px"
