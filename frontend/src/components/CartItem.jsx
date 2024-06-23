@@ -36,7 +36,6 @@ const CartItem = ({
   productId,
   available,
 }) => {
-  console.log(available);
   const [open, setOpen] = useState(false);
   const formattedPrice = useFormattedPrice(price);
   const navigateTo = useNavigate();
@@ -77,8 +76,8 @@ const CartItem = ({
       size,
       color,
     });
-    dispatch(setCartCount(res.data.cartLength));
-    refetch();
+      dispatch(setCartCount(res.data.cartLength));
+      refetch();
   };
 
   const handleDecrement = async () => {

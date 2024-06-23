@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import { useEffect } from "react";
-import { Typography , CircularProgress} from "@mui/joy";
+import { Typography, CircularProgress } from "@mui/joy";
 import ProductCarousel from "../components/ProductCarousel";
 import Panel from "../components/Panel";
 import EnhancedEncryptionOutlinedIcon from "@mui/icons-material/EnhancedEncryptionOutlined";

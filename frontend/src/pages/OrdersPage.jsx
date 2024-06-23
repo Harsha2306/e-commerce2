@@ -27,7 +27,7 @@ const OrdersPage = () => {
       if (error.data.message === "Not Authorized") navigateTo("/login");
       else if (error.data.message === "jwt expired") {
         setShow(true);
-        setTimeout(() => navigateTo("/login"));
+        setTimeout(() => navigateTo("/login"), 2000);
       }
     }
     if (data && data.ok) {

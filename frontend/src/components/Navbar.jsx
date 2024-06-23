@@ -97,5 +97,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-//TODO sort by, price range - discount price

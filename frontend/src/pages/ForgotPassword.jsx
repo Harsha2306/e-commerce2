@@ -22,7 +22,7 @@ const validateEmail = (email, cb) => {
 };
 
 const ForgotPassword = () => {
-  useIsLoggedIn()
+  useIsLoggedIn();
   const navigateTo = useNavigate();
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);

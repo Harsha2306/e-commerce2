@@ -1,5 +1,5 @@
 import { Grid, TextField } from "@mui/material";
-import { Typography , CircularProgress} from "@mui/joy";
+import { Typography, CircularProgress } from "@mui/joy";
 import { useState } from "react";
 import StyledButton from "../components/StyledButton";
 import { useParams } from "react-router-dom";
@@ -23,7 +23,7 @@ const validatePassword = (password, cb) => {
 };
 
 const PasswordReset = () => {
-   useIsLoggedIn();
+  useIsLoggedIn();
   const { token } = useParams();
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);

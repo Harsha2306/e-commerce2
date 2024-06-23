@@ -1,15 +1,21 @@
-import { Grid, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import {
+  Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import { Typography, Divider, CircularProgress } from "@mui/joy";
 import CartItem from "../components/CartItem";
 import StyledButton from "../components/StyledButton";
-import { useGetCartQuery, usePostOrderMutation } from "../api/UserApi";
+import { useGetCartQuery, useCheckoutMutation } from "../api/UserApi";
 import { useState, useEffect } from "react";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
 import { useNavigate, useLocation } from "react-router-dom";
-import useIsLoggedIn from "../hooks/useIsLoggedIn";
-import { setCartCount } from "../redux-store/userSlice";
+import { loadStripe } from "@stripe/stripe-js";
 import { useDispatch } from "react-redux";
+import { setCartCount } from "../redux-store/userSlice";
 
 const CartPage = () => {
   useIsLoggedIn();
@@ -22,16 +28,15 @@ const CartPage = () => {
   const [show, setShow] = useState(false);
   const [showFinal, setShowFinal] = useState(false);
   const navigateTo = useNavigate();
-  const [postOrder, { isLoading: isAdding, isError: errorWhileOrdering }] =
-    usePostOrderMutation();
-  const dispatch = useDispatch();
+  const [postCheckout] = useCheckoutMutation();
+  const [stripeLoading, setStripeLoading] = useState(false);
 
   useEffect(() => {
     if (isError) {
-      if (error.data.message === "Not Authorized") {
+      if (error?.data?.message === "Not Authorized") {
         navigateTo("/login");
       }
-      if (error.data.message === "jwt expired") {
+      if (error?.data?.message === "jwt expired") {
         setShow(true);
         setTimeout(() => {
           navigateTo("/login");
@@ -49,14 +54,21 @@ const CartPage = () => {
     refetch();
   }, [location, refetch]);
 
-  console.log(isAdding);
-
   const checkOut = async () => {
-    const res = await postOrder();
-    if (res.error) {
-    } else {
-      dispatch(setCartCount(0));
-      navigateTo("/order-history");
+    setStripeLoading(true);
+    const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PK);
+    const res = await postCheckout().unwrap();
+    if (res?.message === "Not Authorized") navigateTo("/login");
+    else if (res?.message === "jwt expired") {
+      setShow(true);
+      setTimeout(() => {
+        navigateTo("/login");
+      }, 2000);
+    }
+    const sessionId = res.sessionId;
+    const result = await stripe.redirectToCheckout({ sessionId });
+    if (result.error) {
+      navigateTo("/cart");
     }
   };
 
@@ -208,13 +220,18 @@ const CartPage = () => {
         <DialogActions>
           {canPlaceOrder > 0 && (
             <StyledButton
+              endIcon={
+                stripeLoading && (
+                  <CircularProgress size="sm" variant="solid" color="neutral" />
+                )
+              }
               variant="contained"
               width="50%"
               height="40px"
               color="white"
               backgroundColor="black"
               hoverStyles={{ color: "white", backgroundColor: "black" }}
-              text="Confirm"
+              text={!stripeLoading && "Confirm"}
               onClick={checkOut}
             />
           )}

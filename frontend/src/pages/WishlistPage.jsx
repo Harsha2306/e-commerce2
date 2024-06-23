@@ -1,7 +1,7 @@
 import { Grid } from "@mui/material";
 import { Typography, Divider, CircularProgress } from "@mui/joy";
 import WishlistItem from "../components/WishListItem";
-import { useGetWishlistQuery } from "../api/UserApi";
+import { useGetWishlistQuery, useGetUserPropertiesQuery } from "../api/UserApi";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
@@ -27,14 +27,14 @@ const WishlistPage = () => {
     if (isError) {
       if (error.data.message === "Not Authorized") {
         navigateTo("/login");
-      } else if (error.data.message === "No wishlist found") setEmpty(true);
-      else if (error.data.message === "jwt expired") {
+      } else if (error.data.message === "jwt expired") {
         setShow(true);
         setTimeout(() => {
           navigateTo("/login");
         }, 2000);
       }
     }
+    setEmpty(data?.wishlist?.length === 0);
   }, [isError, isLoading, error, navigateTo, data]);
 
   useEffect(() => {

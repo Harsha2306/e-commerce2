@@ -7,6 +7,7 @@ const Order = require("../models/order");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const { isAuthorizedFlag } = require("../util/isAuthorized");
+const stripe = require("stripe")(process.env.STRIPE_SK);
 
 const mongoose = require("mongoose");
 
@@ -610,35 +611,35 @@ exports.getWishlist = async (req, res, next) => {
         statusCode: 404,
         ok: false,
       });
-    const productIds = wishlist.items.map((item) => item.productId._id);
-    const products = await Product.find({ _id: { $in: productIds } });
-    const wishlistProds = wishlist.items.map((item) => {
-      const product = products.find(
-        (p) => p._id.toString() === item.productId._id.toString()
-      );
-      const idx = product.itemAvailableColors.findIndex(
-        (color) => color === item.color
-      );
-      let itemPrice = product.itemPrice;
-      if (product.itemDiscount > 0) {
-        itemPrice = Math.round(product.discountedPrice);
-      }
-      const img = idx !== -1 ? product.itemAvailableImages[6 * idx] : null;
-      return {
-        _id: item._id,
-        productId: product._id,
-        name: product.itemName,
-        img,
-        color: item.color,
-        size: item.size,
-        price: itemPrice,
-        available: product.available,
-      };
-    });
-    res.status(200).json({
-      ok: true,
-      wishlist: wishlistProds,
-    });
+      const productIds = wishlist.items.map((item) => item.productId._id);
+      const products = await Product.find({ _id: { $in: productIds } });
+      const wishlistProds = wishlist.items.map((item) => {
+        const product = products.find(
+          (p) => p._id.toString() === item.productId._id.toString()
+        );
+        const idx = product.itemAvailableColors.findIndex(
+          (color) => color === item.color
+        );
+        let itemPrice = product.itemPrice;
+        if (product.itemDiscount > 0) {
+          itemPrice = Math.round(product.discountedPrice);
+        }
+        const img = idx !== -1 ? product.itemAvailableImages[6 * idx] : null;
+        return {
+          _id: item._id,
+          productId: product._id,
+          name: product.itemName,
+          img,
+          color: item.color,
+          size: item.size,
+          price: itemPrice,
+          available: product.available,
+        };
+      });
+      res.status(200).json({
+        ok: true,
+        wishlist: wishlistProds,
+      });
   } catch (error) {
     next(error);
   }
@@ -694,6 +695,77 @@ exports.getCart = async (req, res, next) => {
       ok: true,
       cart: { items: cartItems, totalPrice },
       inStock,
+      wishlistCount,
+      cartCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.checkout = async (req, res, next) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.userId);
+    const cart = await Cart.findOne({ userId });
+    if (!cart)
+      throw handleError({
+        message: "Cart not found",
+        statusCode: 404,
+        ok: false,
+      });
+    const productIds = cart.items.map((item) => item.productId);
+    const products = await Product.find({ _id: { $in: productIds } });
+    const productIdNameMap = new Map();
+    const productIdDiscountPrice = new Map();
+    const productAvailableMap = new Map();
+
+    products.forEach((product) => {
+      productIdNameMap.set(product._id.toString(), product.itemName);
+      productIdDiscountPrice.set(
+        product._id.toString(),
+        Math.round(product.discountedPrice)
+      );
+      productAvailableMap.set(product._id.toString(), product.available);
+    });
+
+    const orderedItems = cart.items
+      .filter((item) => productAvailableMap.get(item.productId.toString()))
+      .map((item) => {
+        return {
+          productId: item.productId,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          price: Math.round(
+            item.quantity *
+              productIdDiscountPrice.get(item.productId.toString())
+          ),
+        };
+      });
+
+    const lineItems = orderedItems.map((product) => ({
+      price_data: {
+        currency: "INR",
+        product_data: {
+          name: productIdNameMap.get(product.productId.toString()),
+        },
+        unit_amount: (product.price * 100) / product.quantity,
+      },
+      quantity: product.quantity,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      success_url: "http://localhost:5173/payment-success",
+      cancel_url: "http://localhost:5173/cart",
+    });
+
+    res.status(201).json({
+      message: "Payment session created",
+      ok: true,
+      sessionId: session.id,
     });
   } catch (error) {
     next(error);
@@ -711,46 +783,36 @@ exports.postOrder = async (req, res, next) => {
         notAvailableProductIds,
         ok: false,
       });
-    const items = cart.items;
-    const productIds = items.map((item) => item.productId);
+    const productIds = cart.items.map((item) => item.productId);
+    const products = await Product.find({ _id: { $in: productIds } });
+    const productIdNameMap = new Map();
     const productIdDiscountPrice = new Map();
-    const productIdAvailable = new Map();
-    const orderedProducts = await Product.find({ _id: { $in: productIds } });
-    const availableProductIds = new Set(
-      orderedProducts.map((product) => {
-        productIdDiscountPrice.set(
-          product._id.toString(),
-          Math.round(product.discountedPrice)
-        );
-        productIdAvailable.set(product._id.toString(), product.available);
-        return product._id.toString();
-      })
-    );
-    const notAvailableProductIds = productIds.filter(
-      (productId) => !availableProductIds.has(productId.toString())
-    );
-    if (notAvailableProductIds.length > 0)
-      throw handleError({
-        message: "One or more ordered products are not available",
-        statusCode: 404,
-        notAvailableProductIds,
-        ok: false,
-      });
+    const productAvailableMap = new Map();
+
+    products.forEach((product) => {
+      productIdNameMap.set(product._id.toString(), product.itemName);
+      productIdDiscountPrice.set(
+        product._id.toString(),
+        Math.round(product.discountedPrice)
+      );
+      productAvailableMap.set(product._id.toString(), product.available);
+    });
+    const items = cart.items;
     const orderedItems = items
-      .filter(
-        (item) =>
-          availableProductIds.has(item.productId.toString()) &&
-          productIdAvailable.get(item.productId.toString())
-      )
-      .map((item) => ({
-        productId: item.productId,
-        size: item.size,
-        color: item.color,
-        quantity: item.quantity,
-        price: Math.round(
-          item.quantity * productIdDiscountPrice.get(item.productId.toString())
-        ),
-      }));
+      .filter((item) => productAvailableMap.get(item.productId.toString()))
+      .map((item) => {
+        return {
+          productId: item.productId,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          price: Math.round(
+            item.quantity *
+              productIdDiscountPrice.get(item.productId.toString())
+          ),
+        };
+      });
+
     const order = new Order({ userId, items: orderedItems });
     const savedOrder = await order.save();
     if (!savedOrder)
@@ -760,7 +822,7 @@ exports.postOrder = async (req, res, next) => {
         ok: false,
       });
     cart.items = items.filter(
-      (item) => !productIdAvailable.get(item.productId.toString())
+      (item) => !productAvailableMap.get(item.productId.toString())
     );
     const updatedCart = await cart.save();
     if (!updatedCart)
@@ -809,6 +871,7 @@ exports.getOrders = async (req, res, next) => {
 
 exports.getUserProperties = async (req, res, next) => {
   try {
+    console.log(req.userId);
     const userId = new mongoose.Types.ObjectId(req.userId);
     const cart = await Cart.findOne({ userId });
     const wishlist = await Wishlist.findOne({ userId });
@@ -867,5 +930,3 @@ exports.getOrderDetails = async (req, res, next) => {
     next(error);
   }
 };
-
-//TODO dont delete products instead make availabe/unavailable toggle

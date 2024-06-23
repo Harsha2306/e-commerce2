@@ -24,17 +24,6 @@ const Footer = () => {
         container
       >
         <Grid
-          display="flex"
-          justifyContent="center"
-          item
-          xs={12}
-          paddingTop={2}
-        >
-          <Typography sx={{ color: "white" }} level="title-lg">
-            CONTACT
-          </Typography>
-        </Grid>
-        <Grid
           xs={8}
           container
           item

@@ -101,7 +101,7 @@ exports.login = async (req, res, next) => {
       process.env.JWT_SECRET,
       {
         //expiresIn: "24h",
-        expiresIn: "30m",
+        expiresIn: "15m",
       }
     );
     if (isAdmin)

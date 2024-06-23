@@ -14,11 +14,11 @@ const useIsLoggedIn = () => {
   useEffect(() => {
     if (!isLoading && !isError && data) {
       console.log(data);
-      dispatch(setLogin(true));
-      dispatch(setToken(localStorage.getItem("token")));
-      dispatch(setCartCount(data.cartCount));
-      dispatch(setWishlistCount(data.wishlistCount));
-    }
+        dispatch(setLogin(true));
+        dispatch(setToken(localStorage.getItem("token")));
+        dispatch(setCartCount(data.cartCount));
+        dispatch(setWishlistCount(data.wishlistCount));
+      }
   }, [data, dispatch, isError, isLoading, navigateTo]);
 
   useEffect(() => {
