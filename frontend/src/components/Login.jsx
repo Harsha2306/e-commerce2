@@ -63,8 +63,6 @@ const Login = ({ isAdmin }) => {
     [email, emailError, password, passwordError]
   );
 
-  console.log(isLoginButtonDisabled);
-
   const emailChangeHandler = (e) => {
     setEmail(e.target.value);
     setEmailErrorMessage(validateEmail(e.target.value, setEmailError));
@@ -92,7 +90,6 @@ const Login = ({ isAdmin }) => {
         }
       });
     }
-    console.log(res.data);
     if (res.data && res.data.ok) {
       localStorage.setItem("token", res.data.token);
       dispatch(setToken(res.data.token));
@@ -102,7 +99,6 @@ const Login = ({ isAdmin }) => {
         dispatch(setWishlistCount(res.data.wishlistCount));
         navigateTo("/");
       } else {
-        console.log("Admin logged in");
         dispatch(setIsAdmin(true));
         navigateTo("/admin");
       }
@@ -271,7 +267,7 @@ const Login = ({ isAdmin }) => {
                   to="/register"
                   style={{ textDecoration: "none", color: "black" }}
                 >
-                  DON'T HAVE AN ACCOUNT ? SIGN UP
+                  DON&apos;T HAVE AN ACCOUNT ? SIGN UP
                 </Link>
               </Typography>
             </Grid>

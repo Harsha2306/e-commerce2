@@ -13,6 +13,7 @@ const mongoose = require("mongoose");
 
 exports.getProducts = async (req, res, next) => {
   try {
+    // pagination
     const { category, sortBy, min, max, gender } = req.query;
     const page = +req.query.page || 1;
     const perPage = 10;
@@ -25,7 +26,6 @@ exports.getProducts = async (req, res, next) => {
       });
     }
 
-    console.log(category, sortBy, min, max, gender, page);
     let categories;
     if (category) categories = category.split(",");
 
@@ -611,35 +611,35 @@ exports.getWishlist = async (req, res, next) => {
         statusCode: 404,
         ok: false,
       });
-      const productIds = wishlist.items.map((item) => item.productId._id);
-      const products = await Product.find({ _id: { $in: productIds } });
-      const wishlistProds = wishlist.items.map((item) => {
-        const product = products.find(
-          (p) => p._id.toString() === item.productId._id.toString()
-        );
-        const idx = product.itemAvailableColors.findIndex(
-          (color) => color === item.color
-        );
-        let itemPrice = product.itemPrice;
-        if (product.itemDiscount > 0) {
-          itemPrice = Math.round(product.discountedPrice);
-        }
-        const img = idx !== -1 ? product.itemAvailableImages[6 * idx] : null;
-        return {
-          _id: item._id,
-          productId: product._id,
-          name: product.itemName,
-          img,
-          color: item.color,
-          size: item.size,
-          price: itemPrice,
-          available: product.available,
-        };
-      });
-      res.status(200).json({
-        ok: true,
-        wishlist: wishlistProds,
-      });
+    const productIds = wishlist.items.map((item) => item.productId._id);
+    const products = await Product.find({ _id: { $in: productIds } });
+    const wishlistProds = wishlist.items.map((item) => {
+      const product = products.find(
+        (p) => p._id.toString() === item.productId._id.toString()
+      );
+      const idx = product.itemAvailableColors.findIndex(
+        (color) => color === item.color
+      );
+      let itemPrice = product.itemPrice;
+      if (product.itemDiscount > 0) {
+        itemPrice = Math.round(product.discountedPrice);
+      }
+      const img = idx !== -1 ? product.itemAvailableImages[6 * idx] : null;
+      return {
+        _id: item._id,
+        productId: product._id,
+        name: product.itemName,
+        img,
+        color: item.color,
+        size: item.size,
+        price: itemPrice,
+        available: product.available,
+      };
+    });
+    res.status(200).json({
+      ok: true,
+      wishlist: wishlistProds,
+    });
   } catch (error) {
     next(error);
   }
@@ -695,8 +695,6 @@ exports.getCart = async (req, res, next) => {
       ok: true,
       cart: { items: cartItems, totalPrice },
       inStock,
-      wishlistCount,
-      cartCount,
     });
   } catch (error) {
     next(error);
@@ -743,6 +741,7 @@ exports.checkout = async (req, res, next) => {
         };
       });
 
+    // stripe required structure
     const lineItems = orderedItems.map((product) => ({
       price_data: {
         currency: "INR",
@@ -758,8 +757,8 @@ exports.checkout = async (req, res, next) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: "http://localhost:5173/payment-success",
-      cancel_url: "http://localhost:5173/cart",
+      success_url: `${process.env.BASE_URL}/payment-success`,
+      cancel_url: `${process.env.BASE_URL}/cart`,
     });
 
     res.status(201).json({
@@ -871,7 +870,6 @@ exports.getOrders = async (req, res, next) => {
 
 exports.getUserProperties = async (req, res, next) => {
   try {
-    console.log(req.userId);
     const userId = new mongoose.Types.ObjectId(req.userId);
     const cart = await Cart.findOne({ userId });
     const wishlist = await Wishlist.findOne({ userId });

@@ -48,7 +48,7 @@ const Footer = () => {
               onClick={() =>
                 window.open("https://github.com/Harsha2306", "_blank")
               }
-              sx={{ color: "white" }}
+              sx={{ color: "white", "&:hover": { cursor: "pointer" } }}
               fontSize="large"
             />
           </Grid>
@@ -61,7 +61,10 @@ const Footer = () => {
             }
             xs
           >
-            <EmailIcon sx={{ color: "white" }} fontSize="large" />
+            <EmailIcon
+              sx={{ color: "white", "&:hover": { cursor: "pointer" } }}
+              fontSize="large"
+            />
           </Grid>
         </Grid>
       </Grid>

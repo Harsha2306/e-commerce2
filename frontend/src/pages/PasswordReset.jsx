@@ -39,8 +39,6 @@ const PasswordReset = () => {
 
   const onReset = async () => {
     const res = await reset({ password, token });
-    console.log(res);
-
     if (res?.error?.data?.errorFields) {
       res.error.data.errorFields.map((err) => {
         if (err.field === "password") {

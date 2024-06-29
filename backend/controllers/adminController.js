@@ -5,6 +5,7 @@ const Product = require("../models/product");
 
 const mongoose = require("mongoose");
 
+// controller to get all products requested by admin
 exports.getAllProducts = async (req, res, next) => {
   try {
     if (req.isAdmin === false)
@@ -29,6 +30,7 @@ exports.getAllProducts = async (req, res, next) => {
   }
 };
 
+// controller to get product by id
 exports.getProductById = async (req, res, next) => {
   try {
     if (req.isAdmin === false)
@@ -63,6 +65,7 @@ exports.getProductById = async (req, res, next) => {
   }
 };
 
+// Controller function to add or update a product by admin
 exports.postProduct = async (req, res, next) => {
   try {
     if (req.isAdmin === false)
@@ -168,3 +171,4 @@ exports.postProduct = async (req, res, next) => {
     next(error);
   }
 };
+``

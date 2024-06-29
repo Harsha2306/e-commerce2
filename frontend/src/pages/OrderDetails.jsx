@@ -9,9 +9,13 @@ import useFormattedPrice from "../hooks/useFormattedPrice";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
 import { useState, useEffect } from "react";
 import OrderDetailsItem from "../components/OrderDetailsItem";
+import { setLogin, setToken } from "../redux-store/TokenSlice";
+import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
+import { useDispatch } from "react-redux";
 
 const OrderDetails = () => {
   useIsLoggedIn();
+  const dispatch = useDispatch();
   const navigateTo = useNavigate();
   const location = useLocation();
   const [show, setShow] = useState(false);
@@ -20,12 +24,17 @@ const OrderDetails = () => {
     orderId,
   });
   const formattedTotal = useFormattedPrice(data?.total);
-  console.log(data, error);
 
   useEffect(() => {
     if (isError) {
       if (error?.data?.message === "jwt expired") {
         setShow(true);
+        localStorage.removeItem("token");
+        dispatch(setLogin(false));
+        dispatch(setToken(null));
+        dispatch(setCartCount(0));
+        dispatch(setWishlistCount(0));
+        navigateTo("/login");
         setTimeout(() => {
           navigateTo("/login");
         }, 2000);
@@ -34,7 +43,7 @@ const OrderDetails = () => {
         navigateTo("/login");
       }
     }
-  }, [isError, error, navigateTo]);
+  }, [isError, error, navigateTo, dispatch]);
 
   useEffect(() => {
     refetch();
@@ -145,6 +154,7 @@ const OrderDetails = () => {
               </Grid>
             </Grid>
           </Grid>
+          <Grid item xs={12} mb={5}></Grid>
         </Grid>
       )}
     </>

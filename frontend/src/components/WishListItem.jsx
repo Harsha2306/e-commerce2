@@ -28,7 +28,6 @@ const WishListItem = ({
   productId,
   available,
 }) => {
-  console.log(available);
   const [open, setOpen] = useState(false);
   const [removeFromWishlist, { isLoading: isRemoving }] =
     useRemoveFromWishlistMutation();

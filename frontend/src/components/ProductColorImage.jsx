@@ -4,7 +4,8 @@ import { Grid } from "@mui/material";
 import { ColorContext } from "./ProductDetails";
 
 const ProductColorImage = ({ src, colorValue }) => {
-  const { selectedColor, setSelectedColor } = useContext(ColorContext);
+  const { selectedColor = undefined, setSelectedColor = undefined } =
+    useContext(ColorContext) || {};
   const updateColorValueAndImages = () => {
     setSelectedColor(colorValue);
   };

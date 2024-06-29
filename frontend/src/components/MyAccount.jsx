@@ -27,17 +27,21 @@ const MyAccount = () => {
     navigateTo("/");
   };
 
-  console.log(data);
-
   useEffect(() => {
-    if (isError && error.status === 401) navigateTo("/login");
-    else if (isError && error.data.message === "jwt expired") {
+    if (isError && error?.data?.message === "Not Authorized") {
+      navigateTo("/login");
+    } else if (isError && error?.data?.message === "jwt expired") {
       setShow(true);
+      localStorage.removeItem("token");
+      dispatch(setToken(undefined));
+      dispatch(setLogin(false));
+      dispatch(setCartCount(0));
+      dispatch(setWishlistCount(0));
       setTimeout(() => {
         navigateTo("/login");
       }, 2000);
     }
-  }, [error, navigateTo, isError]);
+  }, [error, navigateTo, isError, dispatch]);
 
   useEffect(() => {
     refetch();

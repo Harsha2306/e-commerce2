@@ -6,7 +6,6 @@ const { handleError } = require("./handleError");
 exports.isAuthorized = (req, res, next) => {
   try {
     const authHeader = req.get("Authorization");
-    console.log(req.get("Authorization"));
     if (!authHeader) {
       throw handleError({
         message: "Not Authorized",

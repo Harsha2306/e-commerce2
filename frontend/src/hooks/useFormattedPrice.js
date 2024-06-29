@@ -5,7 +5,7 @@ const useFormattedPrice = (price) => {
         style: "currency",
         currency: "INR",
         minimumFractionDigits: 0,
-      }).format(price);
+      }).format(Math.floor(price));
 };
 
 export default useFormattedPrice;

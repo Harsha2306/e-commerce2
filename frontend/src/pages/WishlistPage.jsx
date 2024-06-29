@@ -1,14 +1,18 @@
 import { Grid } from "@mui/material";
 import { Typography, Divider, CircularProgress } from "@mui/joy";
 import WishlistItem from "../components/WishListItem";
-import { useGetWishlistQuery, useGetUserPropertiesQuery } from "../api/UserApi";
+import { useGetWishlistQuery } from "../api/UserApi";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
+import { setLogin, setToken } from "../redux-store/TokenSlice";
+import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
+import { useDispatch } from "react-redux";
 
 const WishlistPage = () => {
-  useIsLoggedIn()
+  const dispatch = useDispatch();
+  useIsLoggedIn();
   let { data, isLoading, error, isError, refetch } = useGetWishlistQuery();
   const [wishlist, setWishlist] = useState([]);
   const [empty, setEmpty] = useState(false);
@@ -16,11 +20,8 @@ const WishlistPage = () => {
   const location = useLocation();
   const [show, setShow] = useState(false);
 
-  console.log(data);
-
   useEffect(() => {
     if (!isError && !isLoading && data) {
-      console.log(data.wishlist);
       setWishlist(data.wishlist);
       setEmpty(data.wishlist.length === 0);
     }
@@ -29,13 +30,19 @@ const WishlistPage = () => {
         navigateTo("/login");
       } else if (error.data.message === "jwt expired") {
         setShow(true);
+        localStorage.removeItem("token");
+        dispatch(setLogin(false));
+        dispatch(setToken(null));
+        dispatch(setCartCount(0));
+        dispatch(setWishlistCount(0));
         setTimeout(() => {
           navigateTo("/login");
         }, 2000);
+      } else if (error.data.message === "No wishlist found") {
+        setEmpty(true);
       }
     }
-    setEmpty(data?.wishlist?.length === 0);
-  }, [isError, isLoading, error, navigateTo, data]);
+  }, [isError, isLoading, error, navigateTo, data, dispatch]);
 
   useEffect(() => {
     refetch();
@@ -74,7 +81,7 @@ const WishlistPage = () => {
               level="title-lg"
               sx={{ fontSize: "30px", textAlign: "center" }}
             >
-              Your Wishlist is Empty
+              YOUR WISHLIST IS EMPTY
             </Typography>
           )}
           {!empty && (

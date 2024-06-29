@@ -13,9 +13,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
 import { Link } from "react-router-dom";
+import { setLogin, setToken } from "../redux-store/TokenSlice";
+import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
+import { useDispatch } from "react-redux";
 
 const OrdersPage = () => {
   useIsLoggedIn();
+  const dispatch = useDispatch();
   const [show, setShow] = useState(false);
   const [orders, setOrders] = useState([]);
   const { data, isLoading, isError, error, refetch } = useGetOrdersQuery();
@@ -27,13 +31,20 @@ const OrdersPage = () => {
       if (error.data.message === "Not Authorized") navigateTo("/login");
       else if (error.data.message === "jwt expired") {
         setShow(true);
-        setTimeout(() => navigateTo("/login"), 2000);
+        localStorage.removeItem("token");
+        dispatch(setLogin(false));
+        dispatch(setToken(null));
+        dispatch(setCartCount(0));
+        dispatch(setWishlistCount(0));
+        setTimeout(() => {
+          navigateTo("/login");
+        }, 2000);
       }
     }
     if (data && data.ok) {
       setOrders(data.orders);
     }
-  }, [isError, error, navigateTo, data]);
+  }, [isError, error, navigateTo, data, dispatch]);
 
   useEffect(() => {
     refetch();

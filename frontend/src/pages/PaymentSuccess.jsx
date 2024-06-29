@@ -7,6 +7,8 @@ import { Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
+import { setLogin, setToken } from "../redux-store/TokenSlice";
+import {  setWishlistCount } from "../redux-store/userSlice";
 
 const PaymentSuccess = () => {
   useIsLoggedIn();
@@ -20,6 +22,11 @@ const PaymentSuccess = () => {
     }
     if (error.data.message === "jwt expired") {
       setShow(true);
+      localStorage.removeItem("token");
+      dispatch(setLogin(false));
+      dispatch(setToken(null));
+      dispatch(setCartCount(0));
+      dispatch(setWishlistCount(0));
       setTimeout(() => {
         navigateTo("/login");
       }, 2000);

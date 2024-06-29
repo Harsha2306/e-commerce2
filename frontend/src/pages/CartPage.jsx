@@ -14,11 +14,14 @@ import useFormattedPrice from "../hooks/useFormattedPrice";
 import SessionExpiredAlert from "../components/SessionExpiredAlert";
 import { useNavigate, useLocation } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
+import useIsLoggedIn from "../hooks/useIsLoggedIn";
+import { setLogin, setToken } from "../redux-store/TokenSlice";
+import { setCartCount, setWishlistCount } from "../redux-store/userSlice";
 import { useDispatch } from "react-redux";
-import { setCartCount } from "../redux-store/userSlice";
 
 const CartPage = () => {
   useIsLoggedIn();
+  const dispatch = useDispatch();
   const { data, error, isLoading, isError, refetch } = useGetCartQuery();
   const [cart, setCart] = useState([]);
   const [empty, setEmpty] = useState(false);
@@ -38,9 +41,13 @@ const CartPage = () => {
       }
       if (error?.data?.message === "jwt expired") {
         setShow(true);
-        setTimeout(() => {
-          navigateTo("/login");
-        }, 2000);
+        localStorage.removeItem("token");
+        dispatch(setLogin(false));
+        dispatch(setToken(null));
+        dispatch(setCartCount(0));
+        dispatch(setWishlistCount(0));
+        navigateTo("/login");
+        setTimeout(() => {}, 2000);
       } else if (error.data.message === "No cart found") setEmpty(true);
     }
     if (!isError && !isLoading && data) {
@@ -48,7 +55,7 @@ const CartPage = () => {
       setTotalPrice(data.cart.totalPrice);
       setEmpty(data.cart.items.length === 0);
     }
-  }, [data, error, isError, isLoading, navigateTo]);
+  }, [data, dispatch, error, isError, isLoading, navigateTo]);
 
   useEffect(() => {
     refetch();
@@ -61,6 +68,12 @@ const CartPage = () => {
     if (res?.message === "Not Authorized") navigateTo("/login");
     else if (res?.message === "jwt expired") {
       setShow(true);
+      localStorage.removeItem("token");
+      dispatch(setLogin(false));
+      dispatch(setToken(null));
+      dispatch(setCartCount(0));
+      dispatch(setWishlistCount(0));
+      navigateTo("/login");
       setTimeout(() => {
         navigateTo("/login");
       }, 2000);
@@ -133,10 +146,15 @@ const CartPage = () => {
                 ))}
               </Grid>
               <Grid xs ml={5} container direction="column" item>
-                <Grid item paddingY={2}>
+                <Grid item paddingBottom={2}>
                   <Typography level="h4">ORDER SUMMARY</Typography>
                   <Typography level="body-md">
                     Only In stock products
+                  </Typography>
+                  <Typography level="body-sm">
+                    You can use any email, the card number 4242 4242 4242 4242,
+                    any MM/YY and CVC, and any cardholder name for the payment
+                    in the next step.
                   </Typography>
                 </Grid>
                 <Grid mb={1} item container>

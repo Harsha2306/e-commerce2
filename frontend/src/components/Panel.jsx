@@ -21,7 +21,7 @@ const Panel = ({ icon, heading, text }) => {
           <Typography level="h3">{heading}</Typography>
         </Grid>
         <Grid item>
-          <Typography level="body-md" sx={{ fontWeight: "300" }}>
+          <Typography level="body-md" sx={{ fontWeight: "300", textAlign:'center' }}>
             {text}
           </Typography>
         </Grid>

@@ -11,6 +11,7 @@ const { validationResult } = require("express-validator");
 
 exports.registerUser = async (req, res, next) => {
   try {
+    // used to store errors thrown from validator functions
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const errorFields = errors.array().map((err) => {
@@ -46,6 +47,36 @@ exports.registerUser = async (req, res, next) => {
         ok: false,
       });
     }
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      from: "welcome@store.com",
+      subject: `Welcome to Store`,
+      text: `Hello ${firstName + " " + lastName},\n
+Welcome aboard! We're thrilled to have you join us at Store. Get ready to unlock a world of possibilities for your online business. Whether you're here to shop, or explore, we're here to make your ecommerce journey seamless and successful.\n\n
+If you have any questions or need assistance, feel free to reach out to our support team. We're here to help you get started and thrive.\n\n
+Happy shoping!\n
+Best regards,
+Store team`,
+    };
+
+    transporter.sendMail(mailOptions, (err) => {
+      if (err) {
+        return res.status(500).send("Error sending email.");
+      }
+      res.status(200).send("Password reset email sent.");
+    });
+
     res.status(201).json({
       ok: true,
     });
@@ -92,6 +123,7 @@ exports.login = async (req, res, next) => {
       });
     }
     const isAdmin = user._id.toString() === process.env.ADMIN_ID;
+    // initializing jwt token
     const token = jwt.sign(
       {
         email: user.email,
@@ -100,8 +132,7 @@ exports.login = async (req, res, next) => {
       },
       process.env.JWT_SECRET,
       {
-        //expiresIn: "24h",
-        expiresIn: "15m",
+        expiresIn: "30m",
       }
     );
     if (isAdmin)
@@ -170,7 +201,6 @@ exports.forgotPassword = async (req, res, next) => {
 
     transporter.sendMail(mailOptions, (err) => {
       if (err) {
-        console.error("There was an error: ", err);
         return res.status(500).send("Error sending email.");
       }
       res.status(200).send("Password reset email sent.");

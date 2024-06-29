@@ -20,11 +20,11 @@ import CircularProgressJ from "@mui/joy/CircularProgress";
 import SessionExpiredAlert from "./SessionExpiredAlert";
 import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 import { setCartCount } from "../redux-store/userSlice";
-import useGetPrice from "../hooks/useGetPrice";
 import useFormattedPrice from "../hooks/useFormattedPrice";
 import { setWishlistCount } from "../redux-store/userSlice";
 import { useSelector, useDispatch } from "react-redux";
 import useIsLoggedIn from "../hooks/useIsLoggedIn";
+import { setLogin, setToken } from "../redux-store/TokenSlice";
 
 export const SizeContext = createContext();
 export const ColorContext = createContext();
@@ -98,10 +98,7 @@ const ProductDetails = () => {
     (clr) => clr.color === selectedColor
   );
   const hasDiscount = product.itemDiscount === 0 ? false : true;
-  const formattedDiscountPrice = useGetPrice(
-    product.itemPrice,
-    product.itemDiscount
-  );
+  const formattedDiscountPrice = useFormattedPrice(product.discountedPrice);
   const formattedItemPrice = useFormattedPrice(product.itemPrice);
 
   const handleClose = () => setOpenMiniDialog(false);
@@ -116,6 +113,11 @@ const ProductDetails = () => {
     if (res.error) {
       if (res.error.status === 401) navigateTo("/login");
       else if (res.error.data.message === "jwt expired") {
+        localStorage.removeItem("token");
+        dispatch(setLogin(false));
+        dispatch(setToken(null));
+        dispatch(setCartCount(0));
+        dispatch(setWishlistCount(0));
         setShowAlert(true);
         setTimeout(() => {
           navigateTo("/login");
@@ -151,10 +153,17 @@ const ProductDetails = () => {
     });
     if (res.error) {
       if (res.error.status === 401) navigateTo("/login");
-      else if (res.error.data.message === "jwt expired") setShowAlert(true);
-      setTimeout(() => {
-        navigateTo("/login");
-      }, 2000);
+      else if (res.error.data.message === "jwt expired") {
+        setShowAlert(true);
+        localStorage.removeItem("token");
+        dispatch(setLogin(false));
+        dispatch(setToken(null));
+        dispatch(setCartCount(0));
+        dispatch(setWishlistCount(0));
+        setTimeout(() => {
+          navigateTo("/login");
+        }, 2000);
+      }
     } else {
       setHeading("Added to Wishlist");
       setButtonText("view wishlist");
@@ -349,8 +358,7 @@ const ProductDetails = () => {
                       startIcon={
                         isAddingToWishlist ? (
                           <CircularProgressJ size="sm" color="neutral" />
-                        ) : checkIfProductPresentInWishlistAndCart?.data
-                            .addedToWishList ? (
+                        ) : checkIfProductPresentInWishlistAndCart?.data?.addedToWishList ? (
                           <FavoriteIcon />
                         ) : (
                           <FavoriteBorderIcon />

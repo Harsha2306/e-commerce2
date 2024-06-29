@@ -19,8 +19,7 @@ const ProductsPage = ({ gender }) => {
     page: "1",
   });
   const [initialLoad, setInitialLoad] = useState(true);
-  const { data, isLoading, isError, error } =
-    useGetProductsQuery(filterOptions);
+  const { data, isLoading, error } = useGetProductsQuery(filterOptions);
 
   const getDataFromFilter = (filterOptionsFromFilter) => {
     const updatedFilterOptions = {
@@ -36,16 +35,11 @@ const ProductsPage = ({ gender }) => {
   };
 
   useEffect(() => {
-    if (isError) {
-      if (error?.data?.message === "jwt expired") navigateTo("/login");
-    }
     if (data && data.ok) {
       setProducts(data.products);
       setInitialLoad(false);
     }
-  }, [error, isError, data, navigateTo, filterOptions]);
-
-  console.log(error, isError, products);
+  }, [error, data, navigateTo, filterOptions]);
 
   return (
     <>
@@ -104,7 +98,7 @@ const ProductsPage = ({ gender }) => {
             ))}
         </Grid>
         <Grid mt={4} container>
-          <Grid item mx="auto">
+          <Grid item mb={5} mx="auto">
             {!isLoading && products.length !== 0 && data?.pagination && (
               <Pagination
                 pagination={data.pagination}

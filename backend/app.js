@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
+// import required routes
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -11,20 +12,19 @@ const PORT = 4000;
 
 const app = express();
 
+// establishing connection with mongoDB
 const connectToDB = async () => {
   try {
     await mongoose.connect(URI);
-    console.log("CONNECTED TO DB");
     app.listen(PORT);
-    console.log("SERVER IS UP");
-  } catch (error) {
-    console.log("ERROR CONNECTING TO DB");
-  }
+  } catch (error) {}
 };
 connectToDB();
 
+// Middleware to parse incoming JSON requests
 app.use(express.json());
 
+// Middleware to set CORS headers
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -35,12 +35,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// Define routes
 app.use(authRoutes);
 app.use("/admin", adminRoutes);
 app.use(userRoutes);
 
+// used to handle errors thrown from next() 
 app.use((err, req, res, next) => {
-  console.log(err);
   if (err.statusCode === undefined) {
     err.statusCode = 500;
     err.ok = false;
