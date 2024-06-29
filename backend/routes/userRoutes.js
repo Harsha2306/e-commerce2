@@ -6,6 +6,7 @@ const passwordChangeValidator = require("../validators/passwordChangeValidator")
 
 const router = express.Router();
 
+router.get("/", userController.test)
 router.get("/products", userController.getProducts);
 router.get("/product", userController.getProductById);
 router.get(

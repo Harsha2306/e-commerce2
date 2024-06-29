@@ -928,3 +928,9 @@ exports.getOrderDetails = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.test = (req, res, next) => {
+  res.status(200).json({
+    reached: true,
+  });
+};
