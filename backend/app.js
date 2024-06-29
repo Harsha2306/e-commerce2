@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const helmet = require("helmet");
 require("dotenv").config();
 
 // import required routes
@@ -8,7 +9,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes");
 
 const URI = process.env.MONGODB_URI;
-const PORT = 4000;
+const PORT = Number(process.env.PORT) || 4000;
 
 const app = express();
 
@@ -21,6 +22,7 @@ const connectToDB = async () => {
 };
 connectToDB();
 
+app.use(helmet());
 // Middleware to parse incoming JSON requests
 app.use(express.json());
 
@@ -40,7 +42,7 @@ app.use(authRoutes);
 app.use("/admin", adminRoutes);
 app.use(userRoutes);
 
-// used to handle errors thrown from next() 
+// used to handle errors thrown from next()
 app.use((err, req, res, next) => {
   if (err.statusCode === undefined) {
     err.statusCode = 500;

@@ -1,4 +1,4 @@
-import { Grid, List } from "@mui/material";
+import {  Grid, List } from "@mui/material";
 import { Badge } from "@mui/joy";
 import NavItem from "./NavItem";
 import FavoriteIcon from "@mui/icons-material/FavoriteBorder";
@@ -17,7 +17,8 @@ const Navbar = () => {
   const cartCount = useSelector((state) => state.user.cartCount);
   const wishlistCount = useSelector((state) => state.user.wishlistCount);
 
-  const profileClickHandler = () => {
+  const profileClickHandler = (e) => {
+    e.stopPropagation();
     document.getElementById("accountList").style.display = "block";
   };
   const cartClickHandler = () => {
