@@ -3,11 +3,11 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const userApi = createApi({
   reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
-    baseUrl:
-      "https://e-commerce2-hgaw84lwt-harshas-projects-8bf50264.vercel.app/",
+    baseUrl: "https://e-commerce2-one.vercel.app/",
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) headers.set("Authorization", `Bearer ${token}`);
+      return headers;
     },
   }),
   endpoints: (builder) => ({
