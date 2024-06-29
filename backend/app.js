@@ -13,6 +13,14 @@ const PORT = Number(process.env.PORT) || 4000;
 
 const app = express();
 
+app.use(
+  cors({
+    origin: [""],
+    methods: ["POST", "GET"],
+    credentials: true,
+  })
+);
+
 // establishing connection with mongoDB
 const connectToDB = async () => {
   try {
