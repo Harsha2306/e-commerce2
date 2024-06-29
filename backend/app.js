@@ -21,7 +21,7 @@ app.use(
     origin: "https://e-commerce2-frontend-psi.vercel.app",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
-    allowedHeaders: "*", 
+    allowedHeaders: ["Content-Type", "Authorization"], 
   })
 );
 
