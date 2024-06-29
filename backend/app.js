@@ -15,7 +15,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [""],
+    origin: ["e-commerce2-frontend-psi.vercel.app"],
     methods: ["POST", "GET"],
     credentials: true,
   })
